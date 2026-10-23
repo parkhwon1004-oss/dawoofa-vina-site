@@ -906,55 +906,6 @@ export const EXTENDED_INITIAL_PRODUCTS: FaProductItem[] = [
     "isHot": true
   },
   {
-    "id": "prod-fr-e800",
-    "category": "inverter",
-    "categoryLabel": {
-      "ko": "범용 인버터 (Inverter)",
-      "vi": "Biến tần công nghiệp (Inverter)",
-      "en": "Industrial Inverter (VFD)"
-    },
-    "modelName": "Mitsubishi Electric / FR-E800 Series (FR-E820 / FR-E840)",
-    "brand": "Mitsubishi Electric",
-    "tagline": {
-      "ko": "컴팩트 고기능 인버터, 이더넷 내장, 소형 반송 설비 및 라인 표준화 최적 모델.",
-      "vi": "Biến tần nhỏ gọn đa năng, tích hợp Ethernet, tối ưu cho băng tải và máy móc tự động.",
-      "en": "Compact high-performance inverter with built-in Ethernet for versatile automation machinery."
-    },
-    "specs": {
-      "powerCapacity": "0.1 kW ~ 30 kW",
-      "inputVoltage": "1-Phase 100/200V, 3-Phase 200~240V / 380~480V",
-      "controlMode": "CC-Link IE TSN / Modbus / Dual Ethernet",
-      "encoderResolution": "Dual Port Ethernet (Tích hợp sẵn)",
-      "overloadCapacity": "150% 60초, 200% 3초",
-      "protectionRating": "IP20 / Bo mạch phủ chống ẩm môi trường"
-    },
-    "features": {
-      "vi": [
-        "Tích hợp sẵn 2 cổng Ethernet hỗ trợ CC-Link IE TSN, Modbus-TCP",
-        "Kích thước siêu nhỏ gọn, lắp đặt sát nhau tiết kiệm tủ điện",
-        "Mạch điện tử sơn phủ chống chịu nhiệt đới ẩm Việt Nam"
-      ],
-      "ko": [
-        "듀얼 포트 이더넷 내장 (CC-Link IE TSN, Modbus/TCP 대응)",
-        "초소형 컴팩트 사이즈로 제어반 밀착 설치 가능",
-        "베트남 고온다습 환경에 대응하는 특수 방습 코팅 기판 적용"
-      ],
-      "en": [
-        "Dual Ethernet ports supporting CC-Link IE TSN & Modbus/TCP",
-        "Ultra-compact side-by-side mounting for compact enclosures",
-        "Conformal coated PCB resistant to tropical industrial humidity"
-      ]
-    },
-    "image": "./assets/aistudio/images/INVERTER/INVERTER.png",
-    "inStockVietnam": true,
-    "leadTime": {
-      "vi": "Sẵn hàng tại kho (Giao ngay 24~48h)",
-      "ko": "현지 보세창고 대량 보유 (당일 즉시 출고)",
-      "en": "Bulk stock ready in Vietnam (Immediate delivery)"
-    },
-    "isHot": true
-  },
-  {
     "id": "prod-iq-r",
     "category": "plc",
     "categoryLabel": {
@@ -1543,55 +1494,6 @@ export const EXTENDED_INITIAL_PRODUCTS: FaProductItem[] = [
     "isHot": false
   },
   {
-    "id": "prod-ls-is7",
-    "category": "inverter",
-    "categoryLabel": {
-      "ko": "범용 인버터 (Inverter)",
-      "vi": "Biến tần công nghiệp (Inverter)",
-      "en": "Industrial Inverter (VFD)"
-    },
-    "modelName": "LS ELECTRIC / Starvert iS7 High-Torque Inverter Series",
-    "brand": "LS ELECTRIC",
-    "tagline": {
-      "ko": "정밀 센서리스 벡터 제어 및 고기동 토크를 지원하는 고성능 산업용 범용 인버터.",
-      "vi": "Biến tần công nghiệp hiệu suất cao điều khiển vector không cảm biến từ Hàn Quốc.",
-      "en": "Industrial high-performance inverter with precise sensorless vector control."
-    },
-    "specs": {
-      "powerCapacity": "0.75 kW ~ 160 kW",
-      "inputVoltage": "3-Phase AC 200~230V / 380~480V",
-      "controlMode": "V/F, Sensorless Vector, Flux Vector",
-      "encoderResolution": "RS-485, Modbus-RTU, Profibus-DP, EtherNet/IP",
-      "overloadCapacity": "중부하 150% 60초 / 200% 3초",
-      "protectionRating": "IP20 / IP54 방진형 옵션"
-    },
-    "features": {
-      "vi": [
-        "Đáp ứng mô-men xoắn mạnh mẽ cho tải nặng công nghiệp",
-        "Màn hình LCD đa ngôn ngữ dễ dàng cài đặt tham số",
-        "Sẵn hàng tại kho Việt Nam, đầy đủ C/O Hàn Quốc"
-      ],
-      "ko": [
-        "강력한 저속 토크 및 정밀 속도/토크 제어 성능 제공",
-        "와이드 그래픽 LCD 키패드로 직관적인 파라미터 복사/설정",
-        "한국산 정품 원산지 증명(C/O) 및 현지 보세창고 즉시 출고"
-      ],
-      "en": [
-        "Powerful low-speed torque and precise vector control",
-        "Wide graphic LCD keypad for easy parameter management",
-        "Genuine Korean C/O with immediate Vietnam stock dispatch"
-      ]
-    },
-    "image": "./assets/aistudio/images/INVERTER/INVERTER.png",
-    "inStockVietnam": true,
-    "leadTime": {
-      "vi": "Sẵn hàng tại kho (Giao ngay 24~48h)",
-      "ko": "박닌/빈증 보세창고 상시 재고 보유",
-      "en": "In stock in Vietnam (24-48h delivery)"
-    },
-    "isHot": false
-  },
-  {
     "id": "prod-dawoo-dsn30",
     "category": "dawoorobot",
     "categoryLabel": {
@@ -1740,10 +1642,10 @@ export const EXTENDED_INITIAL_PRODUCTS: FaProductItem[] = [
   }
 ];
 
-const COMPANY_STORAGE_KEY = 'dawoofa_company_info_v6';
-const CATEGORIES_STORAGE_KEY = 'dawoofa_categories_v12';
-const PRODUCTS_STORAGE_KEY = 'dawoofa_products_v12';
-const SLIDER_STORAGE_KEY = 'dawoofa_hero_slider_v7';
+const COMPANY_STORAGE_KEY = 'dawoofa_company_info_v7';
+const CATEGORIES_STORAGE_KEY = 'dawoofa_categories_v13';
+const PRODUCTS_STORAGE_KEY = 'dawoofa_products_v13';
+const SLIDER_STORAGE_KEY = 'dawoofa_hero_slider_v8';
 
 export const normalizeCategoryDef = (cat: any): ProductCategoryDef => {
   const id = typeof cat?.id === 'string' && cat.id.trim() ? cat.id.trim().toLowerCase() : `cat-${Date.now()}`;
@@ -1764,11 +1666,7 @@ export const loadStoredCategories = (): ProductCategoryDef[] => {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        const normalized = parsed.map(normalizeCategoryDef);
-        // Ensure all default OFFICIAL_CATEGORIES are present so new default categories are never lost
-        const existingIds = new Set(normalized.map((c) => c.id));
-        const missingDefaults = OFFICIAL_CATEGORIES.filter((c) => !existingIds.has(c.id));
-        return [...normalized, ...missingDefaults];
+        return parsed.map(normalizeCategoryDef);
       }
     }
     return OFFICIAL_CATEGORIES;
@@ -1909,16 +1807,7 @@ export const loadStoredProducts = (): FaProductItem[] => {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        const storedNormalized = parsed.map((item) => normalizeProductItem(item, activeCategories));
-        // Merge any new default products from EXTENDED_INITIAL_PRODUCTS that weren't in localStorage yet
-        const storedIds = new Set(storedNormalized.map((p) => p.id));
-        const missingDefaultItems = defaultNormalized.filter((d) => !storedIds.has(d.id));
-        if (missingDefaultItems.length > 0) {
-          const merged = [...storedNormalized, ...missingDefaultItems];
-          localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(merged));
-          return merged;
-        }
-        return storedNormalized;
+        return parsed.map((item) => normalizeProductItem(item, activeCategories));
       }
     }
     return defaultNormalized;
@@ -1952,12 +1841,10 @@ export const loadStoredSliderSettings = (): HeroSliderSettings => {
         ...s,
         image: normalizeImagePath(s.image)
       }));
-      const existingIds = new Set(normalizedSlides.map((s: HeroSlideItem) => s.id));
-      const missingDefaultSlides = DEFAULT_HERO_SLIDES.filter((d) => !existingIds.has(d.id));
       return {
         intervalSeconds: typeof parsed.intervalSeconds === 'number' && parsed.intervalSeconds > 0 ? parsed.intervalSeconds : 4,
         autoPlay: parsed.autoPlay !== false,
-        slides: [...normalizedSlides, ...missingDefaultSlides]
+        slides: normalizedSlides
       };
     }
     return DEFAULT_SLIDER_SETTINGS;
