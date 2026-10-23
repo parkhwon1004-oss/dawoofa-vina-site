@@ -1740,10 +1740,10 @@ export const EXTENDED_INITIAL_PRODUCTS: FaProductItem[] = [
   }
 ];
 
-const COMPANY_STORAGE_KEY = 'dawoofa_company_info_v5';
-const CATEGORIES_STORAGE_KEY = 'dawoofa_categories_v11';
-const PRODUCTS_STORAGE_KEY = 'dawoofa_products_v11';
-const SLIDER_STORAGE_KEY = 'dawoofa_hero_slider_v6';
+const COMPANY_STORAGE_KEY = 'dawoofa_company_info_v6';
+const CATEGORIES_STORAGE_KEY = 'dawoofa_categories_v12';
+const PRODUCTS_STORAGE_KEY = 'dawoofa_products_v12';
+const SLIDER_STORAGE_KEY = 'dawoofa_hero_slider_v7';
 
 export const normalizeCategoryDef = (cat: any): ProductCategoryDef => {
   const id = typeof cat?.id === 'string' && cat.id.trim() ? cat.id.trim().toLowerCase() : `cat-${Date.now()}`;
