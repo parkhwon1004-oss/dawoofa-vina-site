@@ -1,41 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Send, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Building, 
   CheckCircle2, 
-  Clock,
-  ArrowRight,
-  FileSpreadsheet
+  Loader2,
+  X
 } from 'lucide-react';
 import { Language } from '../../types';
-import { CompanyInfo, DEFAULT_COMPANY_INFO } from '../../data/companyStore';
+import { 
+  CompanyInfo, 
+  DEFAULT_COMPANY_INFO, 
+  ProductCategoryDef, 
+  OFFICIAL_CATEGORIES 
+} from '../../data/companyStore';
+import { 
+  FORMSUBMIT_ACTION_URL,
+  DEFAULT_RFQ_SUBJECT,
+  buildRfqCcEmails,
+  submitRfqViaFormSubmit
+} from '../../utils/rfqEmailSender';
 
 interface ContactSectionProps {
   lang: Language;
   presetModel?: string;
   companyInfo?: CompanyInfo;
+  categories?: ProductCategoryDef[];
 }
 
 export const ContactSection: React.FC<ContactSectionProps> = ({ 
   lang, 
   presetModel,
-  companyInfo = DEFAULT_COMPANY_INFO 
+  companyInfo = DEFAULT_COMPANY_INFO,
+  categories = OFFICIAL_CATEGORIES
 }) => {
   const [formData, setFormData] = useState({
     company: '',
     name: '',
     email: '',
     phone: '',
-    category: 'servo',
+    category: categories[0]?.id || 'servo',
     modelInterest: presetModel || '',
     urgency: 'fast',
     notes: ''
   });
 
+  const [isSending, setIsSending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [referenceId, setReferenceId] = useState('');
+  const [showToast, setShowToast] = useState(false);
+
+  useEffect(() => {
+    if (presetModel) {
+      setFormData((prev) => ({ ...prev, modelInterest: presetModel }));
+    }
+  }, [presetModel]);
+
+  const ccEmails = buildRfqCcEmails(companyInfo);
 
   const i18n = {
     vi: {
@@ -51,10 +70,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       lblPhone: "Số điện thoại / Số Zalo nhận tư vấn",
       phPhone: "+84 90-123-4567 hoặc +84 222-...",
       lblCategory: "Danh mục sản phẩm quan tâm",
-      catServo: "Hệ thống Servo (MR-J5, MR-J4, DD Motor)",
-      catInverter: "Biến tần công nghiệp (A800, E800 Series)",
-      catPlc: "Bộ lập trình PLC & HMI (MELSEC iQ-R, iQ-F, GOT2000)",
-      catSafety: "Thiết bị an toàn & Dây nối (PILZ, SAMWON ACT)",
       lblModel: "Mã sản phẩm / Số lượng yêu cầu (Nếu có)",
       phModel: "Ví dụ: MR-J5-20G (3 bộ), HG-KR23 (3 cái), FR-E840-0060 (2 cái)",
       lblUrgency: "Tiến độ yêu cầu giao hàng",
@@ -63,8 +78,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       lblNotes: "Thông số kỹ thuật chi tiết hoặc ghi chú thêm",
       phNotes: "Vui lòng cung cấp công suất (kW), điện áp (220V/380V), tỷ số truyền hoặc mã thiết bị cũ cần thay thế tương đương...",
       btnSubmit: "GỬI YÊU CẦU BÁO GIÁ CHÍNH THỨC (SUBMIT RFQ)",
-      successTitle: "YÊU CẦU BÁO GIÁ ĐÃ ĐƯỢC TIẾP NHẬN THÀNH CÔNG!",
-      successDesc: "Kỹ sư phụ trách khu vực của DAWOOFA VINA sẽ liên hệ và gửi bảng báo giá chính thức kèm chứng chỉ C/O & C/Q qua email của quý khách trong vòng 2 giờ làm việc.",
+      sendingText: "Đang gửi yêu cầu báo giá...",
+      toastMsg: "견적 요청이 정상 접수되었습니다 (Yêu cầu báo giá đã được tiếp nhận)",
+      successTitle: "견적 요청이 정상 접수되었습니다!",
+      successDesc: "Kỹ sư phụ trách khu vực của DAWOOFA VINA đã nhận được yêu cầu và sẽ gửi bảng báo giá chính thức kèm chứng chỉ C/O & C/Q qua email của quý khách trong vòng 2 giờ làm việc.",
       btnAnother: "Gửi thêm yêu cầu báo giá khác",
       hubBoxTitle: "THÔNG TIN LIÊN HỆ TRỰC TIẾP DAWOOFA VINA",
       hotlineLabel: "HOTLINE KỸ THUẬT KHẨN CẤP (24/7):",
@@ -78,7 +95,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     ko: {
       badge: "ONLINE RFQ & TECHNICAL INQUIRY",
       title: "온라인 정식 견적 요청 및 기술 사양 문의",
-      subtitle: "필요하신 미쓰비시 서보, 인버터, PLC 형번 또는 사양을 입력해 주시면 베트남 현지 공인 엔지니어가 2시간 이내에 정식 견적서와 도면을 회신해 드립니다.",
+      subtitle: "필요하신 미쓰비시 서보, 인버터, PLC, 로봇 형번 또는 사양을 입력해 주시면 다우FA 담당자 메일로 즉시 전송되며, 2시간 이내에 정식 견적서와 도면을 회신해 드립니다.",
       lblCompany: "회사명 / 법인명",
       phCompany: "예: (주)다우테크 비나 사업장 / 협력사",
       lblName: "담당자명 및 직함",
@@ -88,10 +105,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       lblPhone: "연락처 (Zalo / 휴대폰)",
       phPhone: "+84 90-123-4567 또는 010-0000-0000",
       lblCategory: "관심 제품 분류",
-      catServo: "서보 시스템 (MELSERVO MR-J5, J4, DD모터)",
-      catInverter: "인버터 (FREQROL-A800, E800)",
-      catPlc: "PLC 및 제어기기 (MELSEC iQ-R, iQ-F, GOT2000)",
-      catSafety: "안전 솔루션 & 전장 부품 (PILZ, 삼원ACT)",
       lblModel: "검토 모델명 / 수량 (선택 사항)",
       phModel: "예: MR-J5-20G 3대, HG-KR23 3대, FR-E840 2대",
       lblUrgency: "납기 희망 일정",
@@ -100,8 +113,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       lblNotes: "상세 요구 사항 및 기구 사양",
       phNotes: "모터 출력(kW), 정격전압, 감속비, 통신 프로토콜, 기존 설비 호환 여부를 기재해 주세요.",
       btnSubmit: "정식 견적서 요청하기 (RFQ 접수)",
-      successTitle: "견적 문의가 성공적으로 접수되었습니다!",
-      successDesc: "입력하신 이메일과 전화번호로 베트남 현지 엔지니어가 2시간 이내(영업시간 기준) 정식 견적서와 C/O 성적서를 송부드립니다.",
+      sendingText: "담당자 메일로 견적 요청서 전송 중...",
+      toastMsg: "견적 요청이 정상 접수되었습니다",
+      successTitle: "견적 요청이 정상 접수되었습니다",
+      successDesc: "다우FA 담당자 메일함으로 견적 문의 요청서가 즉시 배달되었습니다. 기재하신 이메일과 연락처로 2시간 이내(영업시간 기준) 정식 견적서와 C/O 성적서를 송부드립니다.",
       btnAnother: "추가 견적 요청하기",
       hubBoxTitle: "DAWOOFA VINA 베트남 공식 거점 안내",
       hotlineLabel: "긴급 기술 핫라인 (24/7):",
@@ -125,10 +140,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       lblPhone: "Phone / Zalo Number",
       phPhone: "+84 90-123-4567",
       lblCategory: "Product Category",
-      catServo: "Servo Systems (MR-J5, MR-J4, DD Motor)",
-      catInverter: "Industrial Inverters (A800, E800 Series)",
-      catPlc: "PLC & HMI Controls (iQ-R, iQ-F, GOT2000)",
-      catSafety: "Safety & Wiring (PILZ, SAMWON ACT)",
       lblModel: "Target Model / Quantity",
       phModel: "e.g. MR-J5-20G (3 pcs), HG-KR23 (3 pcs)",
       lblUrgency: "Required Delivery Schedule",
@@ -137,8 +148,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       lblNotes: "Detailed Specifications & Requirements",
       phNotes: "Please specify motor output (kW), voltage, reduction ratio, communication network...",
       btnSubmit: "SUBMIT REQUEST FOR QUOTATION (RFQ)",
-      successTitle: "QUOTATION REQUEST SUCCESSFULLY SUBMITTED!",
-      successDesc: "Our regional engineering team will respond with an official quotation and C/O & C/Q certificates within 2 business hours.",
+      sendingText: "Submitting quotation request...",
+      toastMsg: "견적 요청이 정상 접수되었습니다 (Quotation request submitted)",
+      successTitle: "QUOTATION REQUEST SUCCESSFULLY RECEIVED!",
+      successDesc: "Your quotation request has been delivered directly to our engineering representative. We will respond with an official quotation within 2 business hours.",
       btnAnother: "Submit Another Inquiry",
       hubBoxTitle: "DAWOOFA VINA OFFICIAL DIRECT CONTACT",
       hotlineLabel: "EMERGENCY HOTLINE (24/7):",
@@ -151,13 +164,60 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     }
   }[lang];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSending(true);
+
+    const newRefId = `DW-VN-${Math.floor(100000 + Math.random() * 900000)}`;
+    const selectedCat = categories.find((c) => c.id === formData.category);
+    const categoryLabel = selectedCat
+      ? `${selectedCat.nameKo} (${selectedCat.nameVn})`
+      : formData.category;
+    const urgencyLabel =
+      formData.urgency === 'fast' ? i18n.urgencyFast : i18n.urgencyStandard;
+
+    await submitRfqViaFormSubmit(
+      {
+        referenceId: newRefId,
+        company: formData.company,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        categoryLabel,
+        modelInterest: formData.modelInterest,
+        urgencyLabel,
+        notes: formData.notes,
+        source: 'contact_page'
+      },
+      companyInfo
+    );
+
+    setReferenceId(newRefId);
+    setIsSending(false);
     setSubmitted(true);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 5000);
   };
 
   return (
-    <section id="contact" className="bg-white border-b border-[#E2E8F0] py-10">
+    <section id="contact" className="bg-white border-b border-[#E2E8F0] py-10 relative">
+      {/* In-site Toast Notification */}
+      {showToast && (
+        <div className="fixed top-20 right-6 z-50 bg-emerald-700 text-white px-5 py-3.5 shadow-xl border border-emerald-500 flex items-center gap-3 animate-fade-in">
+          <CheckCircle2 className="w-5 h-5 text-emerald-200 shrink-0" />
+          <div className="text-xs font-bold font-sans">
+            {i18n.toastMsg}
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowToast(false)}
+            className="text-emerald-200 hover:text-white ml-2 cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       <div className="max-w-[1240px] mx-auto px-4 space-y-6">
         
         {/* Section Header */}
@@ -189,22 +249,34 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 <p className="text-xs text-[#475569] max-w-md mx-auto leading-relaxed">
                   {i18n.successDesc}
                 </p>
-                <div className="p-3 bg-[#F8FAFC] border border-[#CBD5E1] max-w-md mx-auto text-left text-xs font-mono space-y-1">
-                  <div><strong>Công ty:</strong> {formData.company || 'Doanh nghiệp FDI'}</div>
-                  <div><strong>Người liên hệ:</strong> {formData.name || 'Kỹ sư'} ({formData.phone})</div>
-                  <div><strong>Mã sản phẩm:</strong> {formData.modelInterest || 'Servo / Inverter / PLC'}</div>
-                  <div className="text-emerald-700 font-bold"><strong>Mã tiếp nhận:</strong> DW-VN-{Math.floor(100000 + Math.random() * 900000)}</div>
+                <div className="p-3.5 bg-[#F8FAFC] border border-[#CBD5E1] max-w-md mx-auto text-left text-xs font-mono space-y-1">
+                  <div><strong>회사명 (Công ty):</strong> {formData.company || 'Doanh nghiệp FDI'}</div>
+                  <div><strong>담당자 (Người liên hệ):</strong> {formData.name || 'Kỹ sư'} ({formData.phone})</div>
+                  <div><strong>회신 이메일 (Email):</strong> {formData.email}</div>
+                  <div><strong>검토 모델 (Mã sản phẩm):</strong> {formData.modelInterest || 'Servo / Inverter / PLC'}</div>
+                  <div className="text-emerald-700 font-bold"><strong>접수 번호 (Mã tiếp nhận):</strong> {referenceId}</div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setSubmitted(false)}
-                  className="mt-3 px-6 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold shadow-xs"
+                  className="mt-3 px-6 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold shadow-xs cursor-pointer"
                 >
                   {i18n.btnAnother}
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4 text-xs font-sans">
-                
+              <form
+                action={FORMSUBMIT_ACTION_URL}
+                method="POST"
+                onSubmit={handleSubmit}
+                className="space-y-4 text-xs font-sans"
+              >
+                {/* FormSubmit Automation & Security Hidden Options */}
+                <input type="hidden" name="_captcha" value="false" />
+                <input type="hidden" name="_subject" value={DEFAULT_RFQ_SUBJECT} />
+                <input type="hidden" name="_template" value="table" />
+                {ccEmails && <input type="hidden" name="_cc" value={ccEmails} />}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block font-bold text-[#1E293B] mb-1 font-mono">
@@ -213,6 +285,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <input
                       required
                       type="text"
+                      name="company"
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                       placeholder={i18n.phCompany}
@@ -227,6 +300,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <input
                       required
                       type="text"
+                      name="name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder={i18n.phName}
@@ -243,6 +317,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <input
                       required
                       type="email"
+                      name="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder={i18n.phEmail}
@@ -257,6 +332,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <input
                       required
                       type="text"
+                      name="phone"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder={i18n.phPhone}
@@ -271,14 +347,20 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       {i18n.lblCategory}
                     </label>
                     <select
+                      name="category"
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                       className="w-full bg-[#F8FAFC] border border-[#CBD5E1] p-2.5 text-[#1E293B] focus:bg-white focus:border-[#2563EB] outline-none cursor-pointer"
                     >
-                      <option value="servo">{i18n.catServo}</option>
-                      <option value="inverter">{i18n.catInverter}</option>
-                      <option value="plc">{i18n.catPlc}</option>
-                      <option value="safety">{i18n.catSafety}</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {lang === 'ko'
+                            ? `${cat.nameKo} - ${cat.shortDescKo}`
+                            : lang === 'vi'
+                            ? `${cat.nameVn} - ${cat.shortDescVn}`
+                            : `${cat.nameEn} - ${cat.shortDescVn}`}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -287,6 +369,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       {i18n.lblUrgency}
                     </label>
                     <select
+                      name="urgency"
                       value={formData.urgency}
                       onChange={(e) => setFormData({ ...formData, urgency: e.target.value })}
                       className="w-full bg-[#F8FAFC] border border-[#CBD5E1] p-2.5 text-[#1E293B] focus:bg-white focus:border-[#2563EB] outline-none cursor-pointer"
@@ -303,6 +386,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   </label>
                   <input
                     type="text"
+                    name="modelInterest"
                     value={formData.modelInterest}
                     onChange={(e) => setFormData({ ...formData, modelInterest: e.target.value })}
                     placeholder={i18n.phModel}
@@ -316,6 +400,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   </label>
                   <textarea
                     rows={3}
+                    name="notes"
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     placeholder={i18n.phNotes}
@@ -325,10 +410,20 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-black text-xs transition-colors shadow-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                  disabled={isSending}
+                  className="w-full py-3 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-60 text-white font-black text-xs transition-colors shadow-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Send className="w-4 h-4" />
-                  <span>{i18n.btnSubmit}</span>
+                  {isSending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>{i18n.sendingText}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      <span>{i18n.btnSubmit}</span>
+                    </>
+                  )}
                 </button>
 
               </form>

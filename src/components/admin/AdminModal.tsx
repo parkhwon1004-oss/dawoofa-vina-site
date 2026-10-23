@@ -1537,7 +1537,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                               <div className="flex-1 space-y-2">
                                 <button
                                   type="button"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
                                     setRepoSearchQuery('');
                                     setRepoPickerTarget('product');
                                   }}
@@ -2020,7 +2022,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                               <div className="flex-1 space-y-2">
                                 <button
                                   type="button"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
                                     setRepoSearchQuery('');
                                     setRepoPickerTarget('slide');
                                   }}

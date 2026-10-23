@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
-import { X, FolderOpen, Folder, Image as ImageIcon, Search, Check } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { X, FolderOpen, Folder, Image as ImageIcon, Search, Check, RefreshCw } from 'lucide-react';
 
 export interface AistudioImageFile {
   id: string;
   fileName: string;
   label: string;
-  folder: 'ROOT' | 'ADVANTECH' | 'DAWOOROBOT' | 'EPSON' | 'INVERTER' | 'PILZ' | 'PLC' | 'SAMWON' | 'SERVO';
+  folder: string;
   relatedFolders?: string[];
   path: string;
   modelHint: string;
+  mtimeMs?: number;
+  isDynamic?: boolean;
 }
 
 export interface AistudioFolderTab {
-  id: 'ALL' | 'ROOT' | 'ADVANTECH' | 'DAWOOROBOT' | 'EPSON' | 'INVERTER' | 'PILZ' | 'PLC' | 'SAMWON' | 'SERVO';
+  id: string;
   name: string;
   displayPath: string;
   description: string;
@@ -29,7 +31,7 @@ export const AISTUDIO_FOLDER_TABS: AistudioFolderTab[] = [
     id: 'ROOT',
     name: '기본 폴더 (images/)',
     displayPath: './assets/aistudio/images/',
-    description: '루트 기본 이미지 (dawoorobot_img, dkw_img, epson_img, gear_img, lms_img, logo, vsw_img)'
+    description: '루트 기본 이미지 (dawoorobot_img, dkw_img, epson_img, gear_img, lms_img, logo, vsw_img 등)'
   },
   {
     id: 'ADVANTECH',
@@ -199,6 +201,14 @@ export const AISTUDIO_IMAGE_FILES: AistudioImageFile[] = [
 
   // 7. PLC (./assets/aistudio/images/PLC/*)
   {
+    id: 'img-plc-iqf',
+    fileName: 'IQ_F.png',
+    label: '미쓰비시 MELSEC iQ-F PLC (IQ_F)',
+    folder: 'PLC',
+    path: './assets/aistudio/images/PLC/IQ_F.png',
+    modelHint: 'MELSEC iQ-F FX5U / FX5UC Series PLC'
+  },
+  {
     id: 'img-plc-iq',
     fileName: 'IQ_PLC.png',
     label: '미쓰비시 MELSEC iQ-R / iQ-F PLC (IQ_PLC)',
@@ -260,12 +270,113 @@ export const AISTUDIO_IMAGE_FILES: AistudioImageFile[] = [
   }
 ];
 
+// Build-time / bundle-time auto-discovery of all images in /public/assets/aistudio/images/**
+const GLOB_DISCOVERED_PATHS = Object.keys(
+  import.meta.glob('/public/assets/aistudio/images/**/*.{png,jpg,jpeg,webp,gif,svg,PNG,JPG,JPEG,WEBP,GIF,SVG}')
+);
+
+function parseRelativeImageEntry(rawPath: string, mtimeMs?: number): AistudioImageFile | null {
+  // Normalize "/public/assets/aistudio/images/..." or "./assets/aistudio/images/..."
+  const normalized = rawPath
+    .trim()
+    .replace(/^\/public\//, './')
+    .replace(/^public\//, './')
+    .replace(/^\/assets\//, './assets/');
+
+  const prefix = './assets/aistudio/images/';
+  if (!normalized.startsWith(prefix)) return null;
+
+  const subPath = normalized.slice(prefix.length);
+  if (!subPath || subPath.includes('images-manifest.json')) return null;
+
+  const segments = subPath.split('/').filter(Boolean);
+  let folder = 'ROOT';
+  let fileName = subPath;
+
+  if (segments.length === 1) {
+    folder = 'ROOT';
+    fileName = segments[0];
+  } else if (segments.length >= 2) {
+    folder = segments[0];
+    fileName = segments.slice(1).join('/');
+  }
+
+  const canonicalPath =
+    folder === 'ROOT'
+      ? `./assets/aistudio/images/${fileName}`
+      : `./assets/aistudio/images/${folder}/${fileName}`;
+
+  const known = AISTUDIO_IMAGE_FILES.find(
+    (item) => item.path.toLowerCase() === canonicalPath.toLowerCase()
+  );
+
+  if (known) {
+    return {
+      ...known,
+      path: canonicalPath,
+      fileName,
+      folder,
+      mtimeMs
+    };
+  }
+
+  const baseName = fileName.replace(/\.[^/.]+$/, '');
+  return {
+    id: `img-dyn-${folder.toLowerCase()}-${baseName.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+    fileName,
+    label:
+      folder === 'ROOT'
+        ? `기본 폴더 이미지 (${baseName})`
+        : `${folder} 부품 이미지 (${baseName})`,
+    folder,
+    path: canonicalPath,
+    modelHint: folder === 'ROOT' ? `aistudio/images/${fileName}` : `${folder} / ${baseName}`,
+    mtimeMs,
+    isDynamic: true
+  };
+}
+
+function mergeDiscoveredImages(
+  manifestEntries?: { folder: string; fileName: string; path: string; mtimeMs?: number }[]
+): AistudioImageFile[] {
+  const byPath = new Map<string, AistudioImageFile>();
+
+  // 1. Seed from known static presets
+  for (const item of AISTUDIO_IMAGE_FILES) {
+    byPath.set(item.path.toLowerCase(), { ...item });
+  }
+
+  // 2. Merge Vite import.meta.glob discovered files
+  for (const globPath of GLOB_DISCOVERED_PATHS) {
+    const parsed = parseRelativeImageEntry(globPath);
+    if (parsed) {
+      byPath.set(parsed.path.toLowerCase(), parsed);
+    }
+  }
+
+  // 3. If live manifest was fetched, sync with actual disk state
+  if (manifestEntries && manifestEntries.length > 0) {
+    const liveMap = new Map<string, AistudioImageFile>();
+    for (const entry of manifestEntries) {
+      const parsed = parseRelativeImageEntry(entry.path, entry.mtimeMs);
+      if (parsed) {
+        liveMap.set(parsed.path.toLowerCase(), parsed);
+      }
+    }
+    if (liveMap.size > 0) {
+      return Array.from(liveMap.values());
+    }
+  }
+
+  return Array.from(byPath.values());
+}
+
 interface AistudioImageModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentImagePath?: string;
   onSelectImage: (relativePath: string) => void;
-  initialFolder?: AistudioFolderTab['id'];
+  initialFolder?: string;
 }
 
 export const AistudioImageModal: React.FC<AistudioImageModalProps> = ({
@@ -275,8 +386,74 @@ export const AistudioImageModal: React.FC<AistudioImageModalProps> = ({
   onSelectImage,
   initialFolder = 'ALL'
 }) => {
-  const [selectedFolder, setSelectedFolder] = useState<AistudioFolderTab['id']>(initialFolder);
+  const [selectedFolder, setSelectedFolder] = useState<string>(initialFolder);
   const [searchQuery, setSearchQuery] = useState('');
+  const [manifestFiles, setManifestFiles] = useState<
+    { folder: string; fileName: string; path: string; mtimeMs?: number }[] | undefined
+  >(undefined);
+  const [manifestFolders, setManifestFolders] = useState<string[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshTick, setRefreshTick] = useState<number>(() => Date.now());
+
+  const fetchLiveManifest = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await fetch(`./assets/aistudio/images-manifest.json?t=${Date.now()}`, {
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && Array.isArray(data.files)) {
+          setManifestFiles(data.files);
+        }
+        if (data && Array.isArray(data.folders)) {
+          setManifestFolders(data.folders);
+        }
+        setRefreshTick(Date.now());
+      }
+    } catch {
+      // Fallback to import.meta.glob + static list on network/offline error
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchLiveManifest();
+    }
+  }, [isOpen, fetchLiveManifest]);
+
+  const allImages = useMemo(() => {
+    return mergeDiscoveredImages(manifestFiles);
+  }, [manifestFiles]);
+
+  const folderTabs = useMemo(() => {
+    const tabs: AistudioFolderTab[] = [...AISTUDIO_FOLDER_TABS];
+    const existingIds = new Set(tabs.map((t) => t.id.toUpperCase()));
+
+    // Add any newly created subfolders discovered from disk or images
+    const discoveredFolders = new Set<string>(manifestFolders);
+    for (const img of allImages) {
+      if (img.folder && img.folder !== 'ROOT') {
+        discoveredFolders.add(img.folder);
+      }
+    }
+
+    for (const folderName of Array.from(discoveredFolders).sort()) {
+      if (!existingIds.has(folderName.toUpperCase())) {
+        tabs.push({
+          id: folderName,
+          name: folderName,
+          displayPath: `./assets/aistudio/images/${folderName}/`,
+          description: `${folderName} 폴더 내 등록된 이미지 목록`
+        });
+        existingIds.add(folderName.toUpperCase());
+      }
+    }
+
+    return tabs;
+  }, [allImages, manifestFolders]);
 
   if (!isOpen) return null;
 
@@ -289,7 +466,7 @@ export const AistudioImageModal: React.FC<AistudioImageModalProps> = ({
   };
 
   // Filter images by selected folder tab and search query
-  const filteredImages = AISTUDIO_IMAGE_FILES.filter((img) => {
+  const filteredImages = allImages.filter((img) => {
     const matchesFolder =
       selectedFolder === 'ALL' ||
       img.folder === selectedFolder ||
@@ -308,11 +485,17 @@ export const AistudioImageModal: React.FC<AistudioImageModalProps> = ({
   });
 
   const activeTabInfo =
-    AISTUDIO_FOLDER_TABS.find((t) => t.id === selectedFolder) || AISTUDIO_FOLDER_TABS[0];
+    folderTabs.find((t) => t.id === selectedFolder) || folderTabs[0];
 
   return (
-    <div className="fixed inset-0 z-[70] bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-5">
-      <div className="bg-white border-2 border-[#2563EB] w-full max-w-5xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+    <div
+      className="fixed inset-0 z-[70] bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-5"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div
+        className="bg-white border-2 border-[#2563EB] w-full max-w-5xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         
         {/* Top Modal Header */}
         <div className="bg-[#1E293B] text-white px-5 py-3.5 flex items-center justify-between border-b border-slate-700 shrink-0">
@@ -333,14 +516,26 @@ export const AistudioImageModal: React.FC<AistudioImageModalProps> = ({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-slate-400 hover:text-white p-1.5 transition-colors cursor-pointer"
-            title="모달 닫기"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={fetchLiveManifest}
+              disabled={isRefreshing}
+              className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-600 text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="aistudio/images 폴더 내 추가/변경된 이미지를 다시 스캔합니다"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>폴더 새로고침</span>
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-slate-400 hover:text-white p-1.5 transition-colors cursor-pointer"
+              title="모달 닫기"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Folder Tree Category Tabs Bar */}
@@ -348,7 +543,7 @@ export const AistudioImageModal: React.FC<AistudioImageModalProps> = ({
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-[#1E293B]">
               <Folder className="w-4 h-4 text-[#2563EB]" />
-              <span>폴더 트리 카테고리 탭 (aistudio/images 디렉터리 구조):</span>
+              <span>폴더 트리 카테고리 탭 (aistudio/images 디렉터리 실시간 연동):</span>
             </div>
             <span className="text-[11px] font-mono text-[#2563EB] bg-blue-50 px-2.5 py-0.5 border border-blue-200 font-bold">
               탐색 경로: {activeTabInfo.displayPath}
@@ -357,12 +552,12 @@ export const AistudioImageModal: React.FC<AistudioImageModalProps> = ({
 
           {/* Category Tabs Grid/Flex */}
           <div className="flex flex-wrap gap-1.5">
-            {AISTUDIO_FOLDER_TABS.map((tab) => {
+            {folderTabs.map((tab) => {
               const isSelected = selectedFolder === tab.id;
               const count =
                 tab.id === 'ALL'
-                  ? AISTUDIO_IMAGE_FILES.length
-                  : AISTUDIO_IMAGE_FILES.filter(
+                  ? allImages.length
+                  : allImages.filter(
                       (img) =>
                         img.folder === tab.id ||
                         (img.relatedFolders && img.relatedFolders.includes(tab.id))
@@ -400,7 +595,7 @@ export const AistudioImageModal: React.FC<AistudioImageModalProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="파일명(dawoorobot_img.png, dkw_img.png, SERVO.png 등) 또는 폴더명 검색..."
+                placeholder="파일명(IQ_F.png, dawoorobot_img.png, SERVO.png 등) 또는 폴더명 검색..."
                 className="w-full pl-8 pr-3 py-1.5 text-xs border border-[#CBD5E1] focus:border-[#2563EB] focus:outline-none bg-white font-mono"
               />
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" />
@@ -417,6 +612,7 @@ export const AistudioImageModal: React.FC<AistudioImageModalProps> = ({
             {filteredImages.map((item) => {
               const normalizedItemPath = ensureDotSlashPath(item.path);
               const isSelected = currentImagePath === normalizedItemPath;
+              const previewSrc = `${normalizedItemPath}?v=${item.mtimeMs || refreshTick}`;
 
               return (
                 <button
@@ -446,7 +642,7 @@ export const AistudioImageModal: React.FC<AistudioImageModalProps> = ({
                     {/* Image Thumbnail Box */}
                     <div className="w-full h-32 bg-white border border-slate-200 p-2 flex items-center justify-center mb-2.5 overflow-hidden">
                       <img
-                        src={normalizedItemPath}
+                        src={previewSrc}
                         alt={item.fileName}
                         className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-150"
                         onError={(e) => {

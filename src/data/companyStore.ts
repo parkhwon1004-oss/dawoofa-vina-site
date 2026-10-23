@@ -12,92 +12,92 @@ export interface ProductCategoryDef {
 
 export const OFFICIAL_CATEGORIES: ProductCategoryDef[] = [
   {
-    id: 'servo',
-    nameKo: '서보 시스템 (Servo)',
-    nameVn: 'Động cơ Servo & Driver (Servo)',
-    nameEn: 'Servo System',
-    shortDescKo: '미쓰비시 MR-J5 / MR-J4, DD모터',
-    shortDescVn: 'Mitsubishi MR-J5 / MR-J4 & DD Motor'
+    "id": "servo",
+    "nameKo": "서보 시스템 (Servo)",
+    "nameVn": "Động cơ Servo & Driver (Servo)",
+    "nameEn": "Servo System",
+    "shortDescKo": "미쓰비시 MR-J5 / MR-J4, DD모터",
+    "shortDescVn": "Mitsubishi MR-J5 / MR-J4 & DD Motor"
   },
   {
-    id: 'inverter',
-    nameKo: '범용 인버터 (Inverter)',
-    nameVn: 'Biến tần công nghiệp (Inverter)',
-    nameEn: 'Industrial Inverter (VFD)',
-    shortDescKo: '미쓰비시 FREQROL A800 / E800',
-    shortDescVn: 'Mitsubishi FREQROL A800 / E800'
+    "id": "inverter",
+    "nameKo": "범용 인버터 (Inverter)",
+    "nameVn": "Biến tần công nghiệp (Inverter)",
+    "nameEn": "Industrial Inverter (VFD)",
+    "shortDescKo": "미쓰비시 FREQROL A800 / E800",
+    "shortDescVn": "Mitsubishi FREQROL A800 / E800"
   },
   {
-    id: 'plc',
-    nameKo: 'PLC 및 제어기기 (PLC & HMI)',
-    nameVn: 'Bộ lập trình PLC & Màn hình GOT',
-    nameEn: 'PLC & HMI Controls',
-    shortDescKo: 'MELSEC iQ-R, iQ-F, GOT2000',
-    shortDescVn: 'MELSEC iQ-R, iQ-F, GOT2000'
+    "id": "plc",
+    "nameKo": "PLC 및 제어기기 (PLC & HMI)",
+    "nameVn": "Bộ lập trình PLC & Màn hình GOT",
+    "nameEn": "PLC & HMI Controls",
+    "shortDescKo": "MELSEC iQ-R, iQ-F, GOT2000",
+    "shortDescVn": "MELSEC iQ-R, iQ-F, GOT2000"
   },
   {
-    id: 'dawoorobot',
-    nameKo: '다우로봇 (Dawoo Robot)',
-    nameVn: 'Robot tọa độ Dawoo (Dawoo Robot)',
-    nameEn: 'Dawoo Cartesian & Gantry Robots',
-    shortDescKo: '직교좌표 로봇 및 고강성 갠트리 로봇 시스템',
-    shortDescVn: 'Robot tọa độ vuông góc & Hệ thống Gantry'
+    "id": "dawoorobot",
+    "nameKo": "다우로봇 (Dawoo Robot)",
+    "nameVn": "Robot tọa độ Dawoo (Dawoo Robot)",
+    "nameEn": "Dawoo Cartesian & Gantry Robots",
+    "shortDescKo": "직교좌표 로봇 및 고강성 갠트리 로봇 시스템",
+    "shortDescVn": "Robot tọa độ vuông góc & Hệ thống Gantry"
   },
   {
-    id: 'robot',
-    nameKo: '산업용 로봇 (Industrial Robot)',
-    nameVn: 'Robot công nghiệp (Industrial Robot)',
-    nameEn: 'Industrial Articulated Robots',
-    shortDescKo: '6축 수직다관절 및 스카라 산업용 로봇',
-    shortDescVn: 'Robot 6 trục đa khớp & Robot SCARA'
+    "id": "robot",
+    "nameKo": "산업용 로봇 (Industrial Robot)",
+    "nameVn": "Robot công nghiệp (Industrial Robot)",
+    "nameEn": "Industrial Articulated Robots",
+    "shortDescKo": "6축 수직다관절 및 스카라 산업용 로봇",
+    "shortDescVn": "Robot 6 trục đa khớp & Robot SCARA"
   },
   {
-    id: 'wtr',
-    nameKo: '웨이퍼로봇 (WTR Robot)',
-    nameVn: 'Robot chuyển Wafer (WTR Robot)',
-    nameEn: 'Cleanroom Wafer Transfer Robots (WTR)',
-    shortDescKo: '반도체·디스플레이 클린룸 웨이퍼 반송 로봇',
-    shortDescVn: 'Robot gắp Wafer phòng sạch Class 1'
+    "id": "wtr",
+    "nameKo": "웨이퍼로봇 (WTR Robot)",
+    "nameVn": "Robot chuyển Wafer (WTR Robot)",
+    "nameEn": "Cleanroom Wafer Transfer Robots (WTR)",
+    "shortDescKo": "반도체·디스플레이 클린룸 웨이퍼 반송 로봇",
+    "shortDescVn": "Robot gắp Wafer phòng sạch Class 1"
   },
   {
-    id: 'linear',
-    nameKo: '리니어모듈 (Linear Module)',
-    nameVn: 'Mô-đun tuyến tính (Linear Module)',
-    nameEn: 'Linear Modules',
-    shortDescKo: '고정밀 볼스크류/벨트 구동 리니어 액추에이터',
-    shortDescVn: 'Mô-đun trượt tuyến tính Ball Screw & Belt'
+    "id": "linear",
+    "nameKo": "리니어모듈 (Linear Module)",
+    "nameVn": "Mô-đun tuyến tính (Linear Module)",
+    "nameEn": "Linear Modules",
+    "shortDescKo": "고정밀 볼스크류/벨트 구동 리니어 액추에이터",
+    "shortDescVn": "Mô-đun trượt tuyến tính Ball Screw & Belt"
   },
   {
-    id: 'lms',
-    nameKo: 'LMS 시스템 (LMS System)',
-    nameVn: 'Hệ thống vận chuyển từ tính LMS',
-    nameEn: 'LMS Magnetic Transfer System',
-    shortDescKo: '초고속 마그네틱 리니어 모션 반송 시스템',
-    shortDescVn: 'Hệ thống băng tải từ tính tốc độ cao LMS'
+    "id": "lms",
+    "nameKo": "LMS 시스템 (LMS System)",
+    "nameVn": "Hệ thống vận chuyển từ tính LMS",
+    "nameEn": "LMS Magnetic Transfer System",
+    "shortDescKo": "초고속 마그네틱 리니어 모션 반송 시스템",
+    "shortDescVn": "Hệ thống băng tải từ tính tốc độ cao LMS"
   },
   {
-    id: 'reducer',
-    nameKo: '정밀 감속기 (Reducer)',
-    nameVn: 'Hộp giảm tốc độ chính xác (Reducer)',
-    nameEn: 'Precision Planetary Reducers',
-    shortDescKo: 'APEX DYNAMICS 초정밀 유성감속기',
-    shortDescVn: 'APEX DYNAMICS planetary gearboxes'
+    "id": "reducer",
+    "nameKo": "정밀 감속기 (Reducer)",
+    "nameVn": "Hộp giảm tốc độ chính xác (Reducer)",
+    "nameEn": "Precision Planetary Reducers",
+    "shortDescKo": "APEX DYNAMICS 초정밀 유성감속기",
+    "shortDescVn": "APEX DYNAMICS planetary gearboxes"
   },
   {
-    id: 'safety',
-    nameKo: '안전 솔루션 & 하네스 (Safety & Wiring)',
-    nameVn: 'Giải pháp an toàn & Dây nối (Safety)',
-    nameEn: 'Safety Solutions & Wiring Harness',
-    shortDescKo: 'PILZ 안전 릴레이, 삼원ACT 하네스',
-    shortDescVn: 'PILZ Safety Relays & Samwon Cables'
+    "id": "safety",
+    "nameKo": "안전 솔루션 & 하네스 (Safety & Wiring)",
+    "nameVn": "Giải pháp an toàn & Dây nối (Safety)",
+    "nameEn": "Safety Solutions & Wiring Harness",
+    "shortDescKo": "PILZ 안전 릴레이, 삼원ACT 하네스",
+    "shortDescVn": "PILZ Safety Relays & Samwon Cables"
   },
   {
-    id: 'other',
-    nameKo: '기타 자동화 기기 (Other FA)',
-    nameVn: 'Thiết bị tự động hóa khác (Other)',
-    nameEn: 'Other Factory Automation Hardware',
-    shortDescKo: '센서, 전원공급장치 및 악세서리',
-    shortDescVn: 'Sensors, power supplies & accessories'
+    "id": "other",
+    "nameKo": "기타 자동화 기기 (Other FA)",
+    "nameVn": "Thiết bị tự động hóa khác (Other)",
+    "nameEn": "Other Factory Automation Hardware",
+    "shortDescKo": "센서, 전원공급장치 및 악세서리",
+    "shortDescVn": "Sensors, power supplies & accessories"
   }
 ];
 
@@ -147,10 +147,17 @@ export const REPOSITORY_IMAGES: RepositoryImageItem[] = [
   },
   {
     id: 'repo-plc-iq',
-    label: 'MELSEC iQ PLC (IQ_PLC.png)',
+    label: 'MELSEC iQ-R PLC (IQ_PLC.png)',
     category: 'PLC',
     path: './assets/aistudio/images/PLC/IQ_PLC.png',
     modelHint: 'MELSEC iQ-R / iQ-F PLC'
+  },
+  {
+    id: 'repo-plc-iqf',
+    label: 'MELSEC iQ-F PLC (IQ_F.png)',
+    category: 'PLC',
+    path: './assets/aistudio/images/PLC/IQ_F.png',
+    modelHint: 'MELSEC iQ-F FX5U / FX5UC PLC'
   },
   {
     id: 'repo-plc-got',
@@ -267,7 +274,8 @@ export const normalizeImagePath = (rawPath?: string): string => {
   if (lower.includes('dd_motor') || lower.includes('dd-motor') || lower.includes('nikidenso')) return './assets/aistudio/images/SERVO/nikidenso.png';
   if (lower.includes('yskawaservo')) return './assets/aistudio/images/SERVO/yskawaservo.png';
   if (lower.includes('fr_a800') || lower.includes('fr-a800') || lower.includes('fr_e800') || lower.includes('fr-e800')) return './assets/aistudio/images/INVERTER/INVERTER.png';
-  if (lower.includes('iq_r') || lower.includes('melsec-iqr') || lower.includes('iq_f') || lower.includes('melsec-iqf')) return './assets/aistudio/images/PLC/IQ_PLC.png';
+  if (lower.includes('iq_f') || lower.includes('melsec-iqf')) return './assets/aistudio/images/PLC/IQ_F.png';
+  if (lower.includes('iq_r') || lower.includes('melsec-iqr')) return './assets/aistudio/images/PLC/IQ_PLC.png';
   if (lower.includes('got2000') || lower.includes('/got.png')) return './assets/aistudio/images/PLC/got.png';
   if (lower.includes('pilz_safety') || lower.includes('pilz-safety')) return './assets/aistudio/images/PILZ/PILZ.png';
   if (lower.includes('samwon_harness') || lower.includes('samwon-harness')) return './assets/aistudio/images/SAMWON/SAMWON.png';
@@ -332,175 +340,303 @@ export interface HeroSliderSettings {
 
 export const DEFAULT_HERO_SLIDES: HeroSlideItem[] = [
   {
-    id: 'slide-1',
-    slideNumber: 1,
-    badge: {
-      ko: '한국미쓰비시전기 공식 대리점 1급 특약점 (주)다우에프에이 베트남 법인',
-      vi: 'ĐẠI LÝ ỦY QUYỀN MITSUBISHI ELECTRIC CHÍNH THỨC - DAWOOFA VINA',
-      en: 'MITSUBISHI ELECTRIC TIER-1 AUTHORIZED DISTRIBUTOR - DAWOOFA VINA'
+    "id": "slide-1",
+    "slideNumber": 1,
+    "badge": {
+      "ko": "한국미쓰비시전기 공식 대리점 1급 특약점 (주)다우에프에이 베트남 법인",
+      "vi": "ĐẠI LÝ ỦY QUYỀN MITSUBISHI ELECTRIC CHÍNH THỨC - DAWOOFA VINA",
+      "en": "MITSUBISHI ELECTRIC TIER-1 AUTHORIZED DISTRIBUTOR - DAWOOFA VINA"
     },
-    title: {
-      ko: 'MELSERVO MR-J5 & MR-J4 서보 시스템 베트남 보세창고 대량 보유',
-      vi: 'Hệ Thống Servo Cao Cấp MELSERVO MR-J5 & MR-J4 Sẵn Kho Việt Nam',
-      en: 'Premium MELSERVO MR-J5 & MR-J4 Servo Systems In Stock in Vietnam'
+    "title": {
+      "ko": "MELSERVO MR-J5 & MR-J4 서보 시스템 베트남 보세창고 대량 보유",
+      "vi": "Hệ Thống Servo Cao Cấp MELSERVO MR-J5 & MR-J4 Sẵn Kho Việt Nam",
+      "en": "Premium MELSERVO MR-J5 & MR-J4 Servo Systems In Stock in Vietnam"
     },
-    subtitle: {
-      ko: '박닌 & 빈증 물류센터에서 24~48시간 이내 긴급 납품 및 기술지원, 현지 A/S 대응 완비',
-      vi: 'Kho ngoại quan Bắc Ninh & Bình Dương giao hàng trong 24~48h, hỗ trợ kỹ thuật và dịch vụ A/S tại chỗ.',
-      en: 'Bac Ninh & Binh Duong bonded warehouses 24-48h rapid dispatch with resident technical support & local A/S.'
+    "subtitle": {
+      "ko": "박닌 & 빈증 물류센터에서 24~48시간 이내 긴급 납품 및 기술지원, 현지 A/S 대응 완비",
+      "vi": "Kho ngoại quan Bắc Ninh & Bình Dương giao hàng trong 24~48h, hỗ trợ kỹ thuật và dịch vụ A/S tại chỗ.",
+      "en": "Bac Ninh & Binh Duong bonded warehouses 24-48h rapid dispatch with resident technical support & local A/S."
     },
-    image: './assets/aistudio/images/SERVO/SERVO.png',
-    ctaText: {
-      ko: 'MR-J5 즉시 견적 확인',
-      vi: 'Yêu cầu báo giá MR-J5',
-      en: 'Get MR-J5 Instant Quote'
+    "image": "./assets/aistudio/images/SERVO/SERVO.png",
+    "ctaText": {
+      "ko": "MR-J5 즉시 견적 확인",
+      "vi": "Yêu cầu báo giá MR-J5",
+      "en": "Get MR-J5 Instant Quote"
     },
-    targetModel: 'MELSERVO MR-J5 Series',
-    highlightPoints: {
-      ko: ['26-bit 배터리리스 절대위치 엔코더 탑재', 'CC-Link IE TSN 1Gbps 초고속 다축 동기 제어', '100% 정품 C/O, C/Q 및 세금계산서 발행'],
-      vi: ['Bộ mã hóa quang học 26-bit không cần pin dự phòng', 'Mạng CC-Link IE TSN 1Gbps điều khiển đồng bộ nhiều trục', '100% chính hãng C/O, C/Q & Hóa đơn đỏ VAT'],
-      en: ['26-bit battery-less absolute encoder', '1Gbps CC-Link IE TSN multi-axis synchronization', '100% genuine C/O, C/Q & VAT compliance']
-    }
-  },
-  {
-    id: 'slide-2',
-    slideNumber: 2,
-    badge: {
-      ko: 'FREQROL A800 / E800 범용 인버터 전 용량 상시 공급 체계',
-      vi: 'BIẾN TẦN CÔNG NGHIỆP FREQROL A800 & E800 SERIES CHÍNH HÃNG',
-      en: 'GENUINE FREQROL A800 & E800 INDUSTRIAL INVERTER SERIES'
-    },
-    title: {
-      ko: '산업용 고성능 벡터 인버터 & 이더넷 내장 컴팩트 인버터 즉시 출고',
-      vi: 'Biến Tần Vector Thời Gian Thực & Biến Tần Nhỏ Gọn Tích Hợp Ethernet',
-      en: 'High-Performance Real-Time Sensorless Vector & Compact Dual-Ethernet Inverters'
-    },
-    subtitle: {
-      ko: '0.1kW ~ 500kW 전 라인업 보유, 크레인/권상기/반송 라인용 최적 단가 공급 및 파라미터 튜닝 지원',
-      vi: 'Công suất từ 0.1kW ~ 500kW, chuyên dụng cho cẩu trục, băng chuyền và máy móc tự động hóa.',
-      en: '0.1kW to 500kW full line-up for hoists, extruders, winders and automated conveyor lines.'
-    },
-    image: './assets/aistudio/images/INVERTER/INVERTER.png',
-    ctaText: {
-      ko: '인버터 전 모델 견적 문의',
-      vi: 'Báo giá biến tần A800/E800',
-      en: 'Inverter Quote Request'
-    },
-    targetModel: 'FREQROL FR-A800 / FR-E800',
-    highlightPoints: {
-      ko: ['0.3Hz 200% 강력한 기동 토크 실현', '베트남 고온다습 환경 대응 특수 방습 코팅 기판', '당일 출고 및 현장 파라미터 셋업'],
-      vi: ['Mô-men khởi động 200% ở tần số 0.3Hz siêu thấp', 'Bo mạch phủ chống ẩm thích ứng khí hậu nhiệt đới Việt Nam', 'Giao ngay trong ngày & cài đặt tham số tận nơi'],
-      en: ['200% starting torque at 0.3Hz low speed', 'Conformal coated PCB for tropical industrial durability', 'Same-day dispatch & parameter tuning']
-    }
-  },
-  {
-    id: 'slide-3',
-    slideNumber: 3,
-    badge: {
-      ko: '스마트 팩토리 코어 컨트롤러 MELSEC iQ-R & iQ-F PLC / GOT2000',
-      vi: 'HỆ THỐNG PLC MELSEC iQ-R & iQ-F VÀ MÀN HÌNH HMI GOT2000',
-      en: 'MELSEC iQ-R & iQ-F PLC & GOT2000 HMI INDUSTRIAL AUTOMATION'
-    },
-    title: {
-      ko: '나노초(0.98ns) 시퀀스 처리 PLC 및 고해상도 터치패널 GOT2000',
-      vi: 'Bộ Điều Khiển PLC Tốc Độ Nano Giây & Màn Hình Cảm Ứng GOT2000 Sắc Nét',
-      en: 'Nanosecond (0.98ns) High-Speed PLC & Crystal Clear GOT2000 HMIs'
-    },
-    subtitle: {
-      ko: '멀티 CPU 시퀀스+모션 제어, 베트남 현지 공정 라인 신규 구축 및 개조 기술지원 완비',
-      vi: 'Cấu hình đa CPU điều khiển tuần tự và chuyển động, hỗ trợ lập trình cải tiến dây chuyền.',
-      en: 'Multi-CPU sequence & motion architecture with resident software engineering support.'
-    },
-    image: './assets/aistudio/images/PLC/IQ_PLC.png',
-    ctaText: {
-      ko: 'PLC & HMI 견적 확인',
-      vi: 'Yêu cầu báo giá PLC / HMI',
-      en: 'Request PLC / HMI Quote'
-    },
-    targetModel: 'MELSEC iQ-R / iQ-F / GOT2000',
-    highlightPoints: {
-      ko: ['0.98ns 초고속 시퀀스 명령 실행 처리', 'GOT2000 원격 VNC 모니터링 기능 기본 내장', '다우FA 한국 본사 상주 엔지니어 기술지원'],
-      vi: ['Tốc độ xử lý lệnh cơ bản 0.98ns tối ưu nhịp máy', 'Tính năng giám sát VNC từ xa qua điện thoại/máy tính', 'Kỹ sư chuyên gia Hàn Quốc thường trực tại Việt Nam'],
-      en: ['0.98ns ultra-high sequence execution', 'Integrated remote VNC diagnostic server', 'Resident Korea FA senior application engineers']
-    }
-  },
-  {
-    id: 'slide-4',
-    slideNumber: 4,
-    badge: {
-      ko: '다우로봇(DAWOO ROBOT) & 감속기 • 리니어 모듈 토탈 솔루션',
-      vi: 'ROBOT DAWOO FA, HỘP GIẢM TỐC APEX VÀ MÔ-ĐUN TUYẾN TÍNH',
-      en: 'DAWOO ROBOT, APEX PLANETARY REDUCERS & LINEAR ACTUATORS'
-    },
-    title: {
-      ko: '다우 6축 수직다관절 로봇 & APEX 감속기, 리니어 모듈/LMS 시스템',
-      vi: 'Robot Công Nghiệp 6 Trục Đa Khớp & Hộp Giảm Tốc Độ Rơ Siêu Thấp',
-      en: '6-Axis Articulated Robots, Precision Reducers & LMS Transfer Systems'
-    },
-    subtitle: {
-      ko: '박닌 기술센터 데모룸 운영, 서보 직결 백래시 제어 감속기 및 웨이퍼 반송 WTR 로봇 공급',
-      vi: 'Phòng Demo tại Bắc Ninh, hộp số hành tinh độ rơ dưới 1 arcmin và Robot phòng sạch WTR.',
-      en: 'Bac Ninh demo center, < 1 arcmin low-backlash reducers & Class 1 WTR semiconductor robots.'
-    },
-    image: './assets/aistudio/images/dawoorobot_img.png',
-    ctaText: {
-      ko: '로봇 & 감속기 문의',
-      vi: 'Tư vấn Robot & Giảm tốc',
-      en: 'Robot & Reducer Inquiry'
-    },
-    targetModel: 'DAWOO ROBOT / APEX Gearbox',
-    highlightPoints: {
-      ko: ['반복정밀도 ±0.02mm 6축 다관절 로봇', '백래시 1 arcmin 이하 초정밀 유성감속기', '현장 티칭, 설치 및 신속 유지보수 사후관리'],
-      vi: ['Độ chính xác lặp lại ±0.02mm cho Robot 6 trục', 'Hộp giảm tốc bánh răng nghiêng độ rơ cực thấp', 'Chuyển giao công nghệ, dạy học trực tiếp tại xưởng'],
-      en: ['±0.02mm precision 6-axis robotics', '< 1 arcmin ultra-low backlash planetary reducers', 'Turnkey on-site teaching and calibration']
-    }
-  },
-  {
-    id: 'slide-1792758888225',
-    slideNumber: 5,
-    badge: {
-      vi: 'AD BANNER #05 • DAWOOFA VINA',
-      ko: '광고 배너 #05 • 다우에프에이 비나',
-      en: 'AD BANNER #05 • DAWOOFA VINA'
-    },
-    title: {
-      vi: 'Tốc độ phản ứng nhanh, hoạt động tốc độ cao, độ tin cậy cao và cấu trúc đơn giản.',
-      ko: '빠른 반응 속도와 고속 작동,높은 신뢰성과 단순한 구조',
-      en: 'New Main Promotional Banner Title'
-    },
-    subtitle: {
-      vi: 'Điều khiển lực đẩy lớn, tốc độ cao, gia tốc cao, mật độ cố định, cú đánh dài, trượt đa năng',
-      ko: '큰 추력, 고속, 높은 가속도, 고정밀, 롱 스트로크, 멀티슬라이드 제어',
-      en: 'Enter detailed promotional description and featured FA products.'
-    },
-    image: './assets/aistudio/images/dkw_img.png',
-    targetModel: 'DKW Linear',
-    ctaText: {
-      vi: 'Yêu cầu báo giá',
-      ko: '견적 문의하기',
-      en: 'Request Quote'
-    },
-    highlightPoints: {
-      ko: [
-        '100% 정품 C/O, C/Q 보증',
-        '박닌 & 빈증 물류센터 24~48h 직송'
+    "targetModel": "MELSERVO MR-J5 Series",
+    "highlightPoints": {
+      "ko": [
+        "26-bit 배터리리스 절대위치 엔코더 탑재",
+        "CC-Link IE TSN 1Gbps 초고속 다축 동기 제어",
+        "100% 정품 C/O, C/Q 및 세금계산서 발행"
       ],
-      vi: [
-        '100% chính hãng C/O, C/Q',
-        'Giao nhanh 24~48h từ kho Bắc Ninh & Bình Dương'
+      "vi": [
+        "Bộ mã hóa quang học 26-bit không cần pin dự phòng",
+        "Mạng CC-Link IE TSN 1Gbps điều khiển đồng bộ nhiều trục",
+        "100% chính hãng C/O, C/Q & Hóa đơn đỏ VAT"
       ],
-      en: [
-        '100% Genuine C/O & C/Q',
-        '24-48h dispatch from Bac Ninh & Binh Duong'
+      "en": [
+        "26-bit battery-less absolute encoder",
+        "1Gbps CC-Link IE TSN multi-axis synchronization",
+        "100% genuine C/O, C/Q & VAT compliance"
+      ]
+    }
+  },
+  {
+    "id": "slide-2",
+    "slideNumber": 2,
+    "badge": {
+      "ko": "FREQROL A800 / E800 범용 인버터 전 용량 상시 공급 체계",
+      "vi": "BIẾN TẦN CÔNG NGHIỆP FREQROL A800 & E800 SERIES CHÍNH HÃNG",
+      "en": "GENUINE FREQROL A800 & E800 INDUSTRIAL INVERTER SERIES"
+    },
+    "title": {
+      "ko": "산업용 고성능 벡터 인버터 & 이더넷 내장 컴팩트 인버터 즉시 출고",
+      "vi": "Biến Tần Vector Thời Gian Thực & Biến Tần Nhỏ Gọn Tích Hợp Ethernet",
+      "en": "High-Performance Real-Time Sensorless Vector & Compact Dual-Ethernet Inverters"
+    },
+    "subtitle": {
+      "ko": "0.1kW ~ 500kW 전 라인업 보유, 크레인/권상기/반송 라인용 최적 단가 공급 및 파라미터 튜닝 지원",
+      "vi": "Công suất từ 0.1kW ~ 500kW, chuyên dụng cho cẩu trục, băng chuyền và máy móc tự động hóa.",
+      "en": "0.1kW to 500kW full line-up for hoists, extruders, winders and automated conveyor lines."
+    },
+    "image": "./assets/aistudio/images/INVERTER/INVERTER.png",
+    "ctaText": {
+      "ko": "인버터 전 모델 견적 문의",
+      "vi": "Báo giá biến tần A800/E800",
+      "en": "Inverter Quote Request"
+    },
+    "targetModel": "FREQROL FR-A800 / FR-E800",
+    "highlightPoints": {
+      "ko": [
+        "0.3Hz 200% 강력한 기동 토크 실현",
+        "베트남 고온다습 환경 대응 특수 방습 코팅 기판",
+        "당일 출고 및 현장 파라미터 셋업"
+      ],
+      "vi": [
+        "Mô-men khởi động 200% ở tần số 0.3Hz siêu thấp",
+        "Bo mạch phủ chống ẩm thích ứng khí hậu nhiệt đới Việt Nam",
+        "Giao ngay trong ngày & cài đặt tham số tận nơi"
+      ],
+      "en": [
+        "200% starting torque at 0.3Hz low speed",
+        "Conformal coated PCB for tropical industrial durability",
+        "Same-day dispatch & parameter tuning"
+      ]
+    }
+  },
+  {
+    "id": "slide-3",
+    "slideNumber": 3,
+    "badge": {
+      "ko": "스마트 팩토리 코어 컨트롤러 MELSEC iQ-R & iQ-F PLC / GOT2000",
+      "vi": "HỆ THỐNG PLC MELSEC iQ-R & iQ-F VÀ MÀN HÌNH HMI GOT2000",
+      "en": "MELSEC iQ-R & iQ-F PLC & GOT2000 HMI INDUSTRIAL AUTOMATION"
+    },
+    "title": {
+      "ko": "나노초(0.98ns) 시퀀스 처리 PLC 및 고해상도 터치패널 GOT2000",
+      "vi": "Bộ Điều Khiển PLC Tốc Độ Nano Giây & Màn Hình Cảm Ứng GOT2000 Sắc Nét",
+      "en": "Nanosecond (0.98ns) High-Speed PLC & Crystal Clear GOT2000 HMIs"
+    },
+    "subtitle": {
+      "ko": "멀티 CPU 시퀀스+모션 제어, 베트남 현지 공정 라인 신규 구축 및 개조 기술지원 완비",
+      "vi": "Cấu hình đa CPU điều khiển tuần tự và chuyển động, hỗ trợ lập trình cải tiến dây chuyền.",
+      "en": "Multi-CPU sequence & motion architecture with resident software engineering support."
+    },
+    "image": "./assets/aistudio/images/PLC/IQ_PLC.png",
+    "ctaText": {
+      "ko": "PLC & HMI 견적 확인",
+      "vi": "Yêu cầu báo giá PLC / HMI",
+      "en": "Request PLC / HMI Quote"
+    },
+    "targetModel": "MELSEC iQ-R / iQ-F / GOT2000",
+    "highlightPoints": {
+      "ko": [
+        "0.98ns 초고속 시퀀스 명령 실행 처리",
+        "GOT2000 원격 VNC 모니터링 기능 기본 내장",
+        "다우FA 한국 본사 상주 엔지니어 기술지원"
+      ],
+      "vi": [
+        "Tốc độ xử lý lệnh cơ bản 0.98ns tối ưu nhịp máy",
+        "Tính năng giám sát VNC từ xa qua điện thoại/máy tính",
+        "Kỹ sư chuyên gia Hàn Quốc thường trực tại Việt Nam"
+      ],
+      "en": [
+        "0.98ns ultra-high sequence execution",
+        "Integrated remote VNC diagnostic server",
+        "Resident Korea FA senior application engineers"
+      ]
+    }
+  },
+  {
+    "id": "slide-4",
+    "slideNumber": 4,
+    "badge": {
+      "ko": "다우로봇(DAWOO ROBOT) & 감속기 • 리니어 모듈 토탈 솔루션",
+      "vi": "ROBOT DAWOO FA, HỘP GIẢM TỐC APEX VÀ MÔ-ĐUN TUYẾN TÍNH",
+      "en": "DAWOO ROBOT, APEX PLANETARY REDUCERS & LINEAR ACTUATORS"
+    },
+    "title": {
+      "ko": "다우 단축로봇 & APEX 감속기, 리니어 모듈 시스템",
+      "vi": "Robot giảm tốc Dow & APEX giảm tốc, hệ thống module linear",
+      "en": "6-Axis Articulated Robots, Precision Reducers & LMS Transfer Systems"
+    },
+    "subtitle": {
+      "ko": "박닌 기술센터 데모룸 운영, 서보 직결 백래시 제어 감속기 ",
+      "vi": "Phòng Demo tại Bắc Ninh, hộp số hành tinh độ rơ dưới ",
+      "en": "Bac Ninh demo center, < 1 arcmin low-backlash reducers & Class 1 WTR semiconductor robots."
+    },
+    "image": "./assets/aistudio/images/dawoorobot_img.png",
+    "ctaText": {
+      "ko": "로봇 & 감속기 문의",
+      "vi": "Tư vấn Robot & Giảm tốc",
+      "en": "Robot & Reducer Inquiry"
+    },
+    "targetModel": "DAWOO ROBOT / APEX Gearbox",
+    "highlightPoints": {
+      "ko": [
+        "반복정밀도 ±0.02mm 6축 다관절 로봇",
+        "백래시 1 arcmin 이하 초정밀 유성감속기",
+        "현장 티칭, 설치 및 신속 유지보수 사후관리"
+      ],
+      "vi": [
+        "Độ chính xác lặp lại ±0.02mm cho Robot 6 trục",
+        "Hộp giảm tốc bánh răng nghiêng độ rơ cực thấp",
+        "Chuyển giao công nghệ, dạy học trực tiếp tại xưởng"
+      ],
+      "en": [
+        "±0.02mm precision 6-axis robotics",
+        "< 1 arcmin ultra-low backlash planetary reducers",
+        "Turnkey on-site teaching and calibration"
+      ]
+    }
+  },
+  {
+    "id": "slide-1792758888225",
+    "slideNumber": 5,
+    "badge": {
+      "vi": "AD BANNER #05 • DAWOOFA VINA",
+      "ko": "광고 배너 #05 • 다우에프에이 비나",
+      "en": "AD BANNER #05 • DAWOOFA VINA"
+    },
+    "title": {
+      "vi": "Tốc độ phản ứng nhanh, hoạt động tốc độ cao, độ tin cậy cao và cấu trúc đơn giản.",
+      "ko": "빠른 반응 속도와 고속 작동,높은 신뢰성과 단순한 구조",
+      "en": "New Main Promotional Banner Title"
+    },
+    "subtitle": {
+      "vi": "Điều khiển lực đẩy lớn, tốc độ cao, gia tốc cao, mật độ cố định, cú đánh dài, trượt đa năng",
+      "ko": "큰 추력, 고속, 높은 가속도, 고정밀, 롱 스트로크, 멀티슬라이드 제어",
+      "en": "Enter detailed promotional description and featured FA products."
+    },
+    "image": "./assets/aistudio/images/dkw_img.png",
+    "targetModel": "DKW Linear",
+    "ctaText": {
+      "vi": "Yêu cầu báo giá",
+      "ko": "견적 문의하기",
+      "en": "Request Quote"
+    },
+    "highlightPoints": {
+      "ko": [
+        "100% 정품 C/O, C/Q 보증",
+        "박닌 & 빈증 물류센터 24~48h 직송"
+      ],
+      "vi": [
+        "100% chính hãng C/O, C/Q",
+        "Giao nhanh 24~48h từ kho Bắc Ninh & Bình Dương"
+      ],
+      "en": [
+        "100% Genuine C/O & C/Q",
+        "24-48h dispatch from Bac Ninh & Binh Duong"
+      ]
+    }
+  },
+  {
+    "id": "slide-1792761529327",
+    "slideNumber": 6,
+    "badge": {
+      "vi": "AD BANNER #06 • DAWOOFA VINA",
+      "ko": "광고 배너 #06 • 다우에프에이 비나",
+      "en": "AD BANNER #06 • DAWOOFA VINA"
+    },
+    "title": {
+      "vi": "Sản phẩm tích hợp công nghệ tiên tiến trong và ngoài nước của hộp số hành tinh chính xác",
+      "ko": "정밀 행성 기어 박스 국내외의 첨단 기술을 통합한 제품",
+      "en": "New Main Promotional Banner Title"
+    },
+    "subtitle": {
+      "vi": "1. Tiếng ồn thấp: dưới 65db.\n\n2. Bạch vệ thấp: Đối với một giai đoạn đơn, bạch vệ dưới 3 arcmin. Giai đoạn 2 là dưới 5 arcmin.\n\n3. Hiệu suất cao: trên 95% đối với giai đoạn đơn, trên 92% đối với giai đoạn 2.\n\n4. Tốc độ đầu vào cao: 8.000 vòng/phút.",
+      "ko": "1. 낮은 소음: 65db 이하.\n\n2. 낮은 백래시: 단일 단계의 경우 백래시가 3 arcmin 미만입니다. 2단계의 경우 5 arcmin 미만입니다.\n\n3. 높은 효율: 단일 단계의 경우 95% 이상, 2단계의 경우 92% 이상.\n\n4. 높은 입력 속도: 최대 8000RPM.",
+      "en": "Enter detailed promotional description and featured FA products."
+    },
+    "image": "./assets/aistudio/images/gear_img.png",
+    "targetModel": "Gear Box",
+    "ctaText": {
+      "vi": "Yêu cầu báo giá",
+      "ko": "견적 문의하기",
+      "en": "Request Quote"
+    },
+    "highlightPoints": {
+      "ko": [
+        "100% 정품 C/O, C/Q 보증",
+        "박닌 & 빈증 물류센터 24~48h 직송"
+      ],
+      "vi": [
+        "100% chính hãng C/O, C/Q",
+        "Giao nhanh 24~48h từ kho Bắc Ninh & Bình Dương"
+      ],
+      "en": [
+        "100% Genuine C/O & C/Q",
+        "24-48h dispatch from Bac Ninh & Binh Duong"
+      ]
+    }
+  },
+  {
+    "id": "slide-1792761794419",
+    "slideNumber": 7,
+    "badge": {
+      "vi": "AD BANNER #07 • DAWOOFA VINA",
+      "ko": "광고 배너 #07 • 다우에프에이 비나",
+      "en": "AD BANNER #07 • DAWOOFA VINA"
+    },
+    "title": {
+      "vi": "Dây chuyền truyền tải circuit tiêu chuẩn chuyển động từ thông minh linh hoạt",
+      "ko": "유연한 지능형 자기 구동 표준 서킷 전송라인",
+      "en": "New Main Promotional Banner Title"
+    },
+    "subtitle": {
+      "vi": "Nó có thể được áp dụng cho các ngành công nghiệp như 3C, pin lithium, y tế, đồ uống lon.",
+      "ko": "3C, 리튬전지, 의료, 캔 음료등 업종에 적용 가능",
+      "en": "Enter detailed promotional description and featured FA products."
+    },
+    "image": "./assets/aistudio/images/lms_img.png",
+    "targetModel": "LMS system",
+    "ctaText": {
+      "vi": "Yêu cầu báo giá",
+      "ko": "견적 문의하기",
+      "en": "Request Quote"
+    },
+    "highlightPoints": {
+      "ko": [
+        "100% 정품 C/O, C/Q 보증",
+        "박닌 & 빈증 물류센터 24~48h 직송"
+      ],
+      "vi": [
+        "100% chính hãng C/O, C/Q",
+        "Giao nhanh 24~48h từ kho Bắc Ninh & Bình Dương"
+      ],
+      "en": [
+        "100% Genuine C/O & C/Q",
+        "24-48h dispatch from Bac Ninh & Binh Duong"
       ]
     }
   }
 ];
 
 export const DEFAULT_SLIDER_SETTINGS: HeroSliderSettings = {
-  intervalSeconds: 4, // 4초 단위 회전 (기본값)
-  autoPlay: true,
-  slides: DEFAULT_HERO_SLIDES
+  "intervalSeconds": 4,
+  "autoPlay": true,
+  "slides": DEFAULT_HERO_SLIDES
 };
 
 export interface CompanyInfo {
@@ -559,7 +695,7 @@ export const DEFAULT_COMPANY_INFO: CompanyInfo = {
   "koreaHqAddress": "충남 천안시 서북구 백석공단1로 10, 미래에이스하이테크시티",
   "koreaHqUrl": "http://www.dawooservo.co.kr",
   "hotline": "+84 222-389-9988",
-  "email": "contact@dawoofavina.com",
+  "email": "h.park@hindikosolution.com",
   "salesEmail": "sales@dawoofavina.com",
   "taxId": "2301192888",
   "zaloOa": "@dawoofavina_official",
@@ -907,7 +1043,7 @@ export const EXTENDED_INITIAL_PRODUCTS: FaProductItem[] = [
         "Embedded Ethernet port for seamless GOT & SCADA networking"
       ]
     },
-    "image": "./assets/aistudio/images/PLC/IQ_PLC.png",
+    "image": "./assets/aistudio/images/PLC/IQ_F.png",
     "inStockVietnam": true,
     "leadTime": {
       "vi": "Sẵn hàng tại kho (Giao ngay 24~48h)",
@@ -1604,10 +1740,10 @@ export const EXTENDED_INITIAL_PRODUCTS: FaProductItem[] = [
   }
 ];
 
-const COMPANY_STORAGE_KEY = 'dawoofa_company_info_v3';
-const CATEGORIES_STORAGE_KEY = 'dawoofa_categories_v9';
-const PRODUCTS_STORAGE_KEY = 'dawoofa_products_v9';
-const SLIDER_STORAGE_KEY = 'dawoofa_hero_slider_v4';
+const COMPANY_STORAGE_KEY = 'dawoofa_company_info_v5';
+const CATEGORIES_STORAGE_KEY = 'dawoofa_categories_v11';
+const PRODUCTS_STORAGE_KEY = 'dawoofa_products_v11';
+const SLIDER_STORAGE_KEY = 'dawoofa_hero_slider_v6';
 
 export const normalizeCategoryDef = (cat: any): ProductCategoryDef => {
   const id = typeof cat?.id === 'string' && cat.id.trim() ? cat.id.trim().toLowerCase() : `cat-${Date.now()}`;
@@ -1783,34 +1919,6 @@ export const loadStoredProducts = (): FaProductItem[] => {
           return merged;
         }
         return storedNormalized;
-      }
-    }
-    // Check legacy v6, v5, v4, v3 or v2 storage for any custom user-created or edited items
-    const legacyRaw =
-      localStorage.getItem('dawoofa_products_v6') ||
-      localStorage.getItem('dawoofa_products_v5') ||
-      localStorage.getItem('dawoofa_products_v4') ||
-      localStorage.getItem('dawoofa_products_v3') ||
-      localStorage.getItem('dawoofa_products_v2');
-    if (legacyRaw) {
-      const legacyParsed = JSON.parse(legacyRaw);
-      if (Array.isArray(legacyParsed) && legacyParsed.length > 0) {
-        const legacyNormalized = legacyParsed.map((item: any) =>
-          normalizeProductItem(item, activeCategories)
-        );
-        const legacyMap = new Map<string, FaProductItem>();
-        legacyNormalized.forEach((item) => legacyMap.set(item.id, item));
-
-        // Keep user's custom items at the top and preserve any edits made to default items, while ensuring all new EXTENDED_INITIAL_PRODUCTS are included
-        const customItems = legacyNormalized.filter(
-          (item) => !defaultNormalized.some((d) => d.id === item.id)
-        );
-        const mergedDefaults = defaultNormalized.map((defItem) =>
-          legacyMap.has(defItem.id) ? legacyMap.get(defItem.id)! : defItem
-        );
-        const merged = [...customItems, ...mergedDefaults];
-        localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(merged));
-        return merged;
       }
     }
     return defaultNormalized;

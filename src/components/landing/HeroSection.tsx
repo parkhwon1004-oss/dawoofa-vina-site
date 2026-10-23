@@ -127,11 +127,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   {String(slides.length).padStart(2, '0')}
                 </span>
               </div>
-
-              {/* Rolling interval badge */}
-              <span className="hidden sm:inline-block px-2 py-0.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-mono">
-                {intervalSeconds}초 단위 자동 롤링 ({isPlaying ? '자동재생 중' : '일시정지'})
-              </span>
             </div>
 
             {/* Clickable Slide Number Tabs */}
@@ -286,49 +281,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
           </div>
 
-        </div>
-
-        {/* 4 Core Trust Standards Matrix (Compact 4-cell table with bright accents) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-          <div className="bg-[#F8FAFC] border border-[#CBD5E1] p-3 space-y-1 shadow-2xs">
-            <div className="flex items-center gap-1.5 text-[#2563EB] font-bold">
-              <Truck className="w-3.5 h-3.5" />
-              <span className="text-[11px] font-mono">KHO NGOẠI QUAN CÓ SẴN</span>
-            </div>
-            <p className="text-[11px] text-[#64748B] leading-tight">
-              Bắc Ninh &amp; Bình Dương giao hàng trong 24~48 giờ
-            </p>
-          </div>
-
-          <div className="bg-[#F8FAFC] border border-[#CBD5E1] p-3 space-y-1 shadow-2xs">
-            <div className="flex items-center gap-1.5 text-[#2563EB] font-bold">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span className="text-[11px] font-mono">100% CHÍNH HÃNG C/O &amp; C/Q</span>
-            </div>
-            <p className="text-[11px] text-[#64748B] leading-tight">
-              Đầy đủ chứng nhận xuất xứ &amp; chứng nhận chất lượng
-            </p>
-          </div>
-
-          <div className="bg-[#F8FAFC] border border-[#CBD5E1] p-3 space-y-1 shadow-2xs">
-            <div className="flex items-center gap-1.5 text-[#2563EB] font-bold">
-              <Building className="w-3.5 h-3.5" />
-              <span className="text-[11px] font-mono">KỸ SƯ HÀN QUỐC THƯỜNG TRỰC</span>
-            </div>
-            <p className="text-[11px] text-[#64748B] leading-tight">
-              Hỗ trợ cài đặt tham số, tuning servo &amp; xử lý sự cố tại chỗ
-            </p>
-          </div>
-
-          <div className="bg-[#F8FAFC] border border-[#CBD5E1] p-3 space-y-1 shadow-2xs">
-            <div className="flex items-center gap-1.5 text-[#2563EB] font-bold">
-              <FileCheck2 className="w-3.5 h-3.5" />
-              <span className="text-[11px] font-mono">HÓA ĐƠN ĐỎ VAT ĐẦY ĐỦ</span>
-            </div>
-            <p className="text-[11px] text-[#64748B] leading-tight">
-              Pháp nhân Việt Nam MST: {companyInfo.taxId} thanh toán VND/USD
-            </p>
-          </div>
         </div>
 
       </div>

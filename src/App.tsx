@@ -164,6 +164,7 @@ export default function App() {
                 lang={lang}
                 presetModel={rfqTargetModel}
                 companyInfo={companyInfo}
+                categories={categories}
               />
             )}
           </div>
@@ -191,6 +192,7 @@ export default function App() {
         onClose={() => setRfqModalOpen(false)}
         presetModel={rfqTargetModel}
         lang={lang}
+        companyInfo={companyInfo}
       />
 
       {/* Admin Management Modal (Accessible via footer bottom-right button) */}
