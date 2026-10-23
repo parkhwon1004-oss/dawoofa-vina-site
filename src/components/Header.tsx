@@ -191,7 +191,7 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <div className="p-1 bg-white border border-[#E2E8F0] shadow-2xs flex items-center justify-center">
               <img 
-                src="/assets/aistudio/image_31b58e19.png" 
+                src="./assets/aistudio/image_31b58e19.png" 
                 alt="DAWOO FA VINA" 
                 className="h-10 w-auto object-contain" 
               />
