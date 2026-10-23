@@ -1,0 +1,6 @@
+{
+  "name": "FA Korea-Vietnam B2B Landing & IA Wireframe Analyzer",
+  "description": "한국 FA 유통사(다우로봇) 웹사이트 구조 분석 및 베트남 법인 맞춤 B2B 제품 홍보 원페이지 와이어프레임 JSON 설계 & 인터랙티브 웹 플랫폼",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
