@@ -8,7 +8,7 @@ import {
   Package
 } from 'lucide-react';
 import { Language, FaProductItem } from '../../types';
-import { EXTENDED_INITIAL_PRODUCTS, OFFICIAL_CATEGORIES, normalizeCategoryKey } from '../../data/companyStore';
+import { EXTENDED_INITIAL_PRODUCTS, OFFICIAL_CATEGORIES, ProductCategoryDef, normalizeCategoryKey } from '../../data/companyStore';
 
 interface ProductsSectionProps {
   lang: Language;
@@ -18,6 +18,7 @@ interface ProductsSectionProps {
   selectedCategory?: string;
   onSelectCategory?: (category: string) => void;
   products?: FaProductItem[];
+  categories?: ProductCategoryDef[];
 }
 
 export const ProductsSection: React.FC<ProductsSectionProps> = ({ 
@@ -27,7 +28,8 @@ export const ProductsSection: React.FC<ProductsSectionProps> = ({
   onClearSearch,
   selectedCategory = 'all',
   onSelectCategory,
-  products = EXTENDED_INITIAL_PRODUCTS
+  products = EXTENDED_INITIAL_PRODUCTS,
+  categories = OFFICIAL_CATEGORIES
 }) => {
   const [selectedProductModal, setSelectedProductModal] = useState<FaProductItem | null>(null);
 
@@ -91,16 +93,16 @@ export const ProductsSection: React.FC<ProductsSectionProps> = ({
     }
   }[lang];
 
-  // Check if searchQuery itself is an exact category ID from OFFICIAL_CATEGORIES or 'all'
+  // Check if searchQuery itself is an exact category ID from categories or 'all'
   const cleanSearch = (searchQuery || '').trim();
   const isAllKeyword = cleanSearch.toLowerCase() === 'all';
-  const searchQueryAsCategory = OFFICIAL_CATEGORIES.find(
+  const searchQueryAsCategory = categories.find(
     (c) => c.id.toLowerCase() === cleanSearch.toLowerCase()
   );
 
   const effectiveCategory =
     selectedCategory && selectedCategory !== 'all'
-      ? normalizeCategoryKey(selectedCategory)
+      ? normalizeCategoryKey(selectedCategory, categories)
       : searchQueryAsCategory
       ? searchQueryAsCategory.id
       : 'all';
@@ -109,13 +111,13 @@ export const ProductsSection: React.FC<ProductsSectionProps> = ({
 
   // Category order index map for clean sorting
   const categoryOrderMap = new Map<string, number>(
-    OFFICIAL_CATEGORIES.map((c, idx) => [c.id, idx])
+    categories.map((c, idx) => [c.id, idx])
   );
 
   // Strictly 1:1 Category & Search Filtering (Identical to AdminModal.tsx)
   const filteredProducts = products
     .filter((product) => {
-      const productCatId = normalizeCategoryKey(product.category);
+      const productCatId = normalizeCategoryKey(product.category, categories);
 
       // 1. Strict 1:1 category match when a specific category is selected
       if (effectiveCategory !== 'all' && productCatId !== effectiveCategory) {
@@ -147,8 +149,8 @@ export const ProductsSection: React.FC<ProductsSectionProps> = ({
       return true;
     })
     .sort((a, b) => {
-      const catA = categoryOrderMap.get(normalizeCategoryKey(a.category)) ?? 99;
-      const catB = categoryOrderMap.get(normalizeCategoryKey(b.category)) ?? 99;
+      const catA = categoryOrderMap.get(normalizeCategoryKey(a.category, categories)) ?? 99;
+      const catB = categoryOrderMap.get(normalizeCategoryKey(b.category, categories)) ?? 99;
       return catA - catB;
     });
 
@@ -160,8 +162,8 @@ export const ProductsSection: React.FC<ProductsSectionProps> = ({
   };
 
   const renderProductCard = (product: FaProductItem) => {
-    const catId = normalizeCategoryKey(product.category);
-    const matchedCatDef = OFFICIAL_CATEGORIES.find((c) => c.id === catId);
+    const catId = normalizeCategoryKey(product.category, categories);
+    const matchedCatDef = categories.find((c) => c.id === catId);
     const categoryDisplayTitle = matchedCatDef
       ? lang === 'ko'
         ? matchedCatDef.nameKo
@@ -209,7 +211,7 @@ export const ProductsSection: React.FC<ProductsSectionProps> = ({
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.onerror = null;
-              target.src = '/assets/aistudio/image_31b58e19.png';
+              target.src = './assets/aistudio/images/logo.png';
             }}
           />
         </div>
@@ -306,7 +308,7 @@ export const ProductsSection: React.FC<ProductsSectionProps> = ({
 
         {/* Active Category or Search Status Strip */}
         {(effectiveCategory !== 'all' || effectiveTextQuery !== '') ? (() => {
-          const matchedCat = OFFICIAL_CATEGORIES.find((c) => c.id === effectiveCategory);
+          const matchedCat = categories.find((c) => c.id === effectiveCategory);
           const displayLabel = matchedCat
             ? lang === 'ko'
               ? matchedCat.nameKo
@@ -346,7 +348,7 @@ export const ProductsSection: React.FC<ProductsSectionProps> = ({
               <Package className="w-4 h-4 text-[#2563EB]" />
               <span className="font-extrabold">
                 {lang === 'ko'
-                  ? `전체 취급제품군 보기 (All Categories) • ${OFFICIAL_CATEGORIES.length}대 카테고리 등록 전 모델 통합 출력`
+                  ? `전체 취급제품군 보기 (All Categories) • ${categories.length}대 카테고리 등록 전 모델 통합 출력`
                   : lang === 'vi'
                   ? 'Tất cả danh mục sản phẩm FA (All Categories) • Hiển thị toàn bộ sản phẩm'
                   : 'All FA Product Categories • Showing All Registered Models'}
@@ -417,7 +419,7 @@ export const ProductsSection: React.FC<ProductsSectionProps> = ({
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.onerror = null;
-                    target.src = '/assets/aistudio/image_31b58e19.png';
+                    target.src = './assets/aistudio/images/logo.png';
                   }}
                 />
               </div>

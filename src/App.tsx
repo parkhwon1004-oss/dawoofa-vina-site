@@ -19,6 +19,8 @@ import { Language, FaProductItem } from './types';
 import { 
   CompanyInfo, 
   HeroSliderSettings,
+  ProductCategoryDef,
+  loadStoredCategories,
   loadStoredCompanyInfo, 
   loadStoredProducts,
   loadStoredSliderSettings
@@ -39,7 +41,8 @@ export default function App() {
   // Admin Management Modal State
   const [adminModalOpen, setAdminModalOpen] = useState(false);
 
-  // Dynamic Company Information, Product Catalog & Hero Slider Store
+  // Dynamic Categories, Company Information, Product Catalog & Hero Slider Store
+  const [categories, setCategories] = useState<ProductCategoryDef[]>(() => loadStoredCategories());
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(() => loadStoredCompanyInfo());
   const [products, setProducts] = useState<FaProductItem[]>(() => loadStoredProducts());
   const [sliderSettings, setSliderSettings] = useState<HeroSliderSettings>(() => loadStoredSliderSettings());
@@ -93,6 +96,7 @@ export default function App() {
         }}
         companyInfo={companyInfo}
         products={products}
+        categories={categories}
       />
 
       {/* Main Content Area */}
@@ -138,6 +142,7 @@ export default function App() {
                   selectedCategory={selectedCategory}
                   onSelectCategory={setSelectedCategory}
                   products={products}
+                  categories={categories}
                 />
                 <BrandsSection
                   lang={lang}
@@ -193,6 +198,8 @@ export default function App() {
         isOpen={adminModalOpen}
         onClose={() => setAdminModalOpen(false)}
         lang={lang}
+        categories={categories}
+        onUpdateCategories={setCategories}
         companyInfo={companyInfo}
         onUpdateCompanyInfo={setCompanyInfo}
         products={products}

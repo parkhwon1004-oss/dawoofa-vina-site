@@ -18,28 +18,48 @@ import {
   Sliders,
   Clock,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  FolderOpen,
+  Image as ImageIcon,
+  Check,
+  Copy,
+  Download,
+  Code,
+  FileJson,
+  Database,
+  HelpCircle
 } from 'lucide-react';
 import { FaProductItem, Language } from '../../types';
 import {
   CompanyInfo,
   HeroSliderSettings,
   HeroSlideItem,
+  ProductCategoryDef,
   OFFICIAL_CATEGORIES,
   DEFAULT_COMPANY_INFO,
   EXTENDED_INITIAL_PRODUCTS,
   DEFAULT_SLIDER_SETTINGS,
+  REPOSITORY_IMAGES,
+  saveStoredCategories,
   saveStoredCompanyInfo,
   saveStoredProducts,
   saveStoredSliderSettings,
   resetStoreToFactoryDefaults,
-  normalizeCategoryKey
+  normalizeCategoryKey,
+  normalizeImagePath,
+  generateTypeScriptSourceSyncCode,
+  generateStoreJsonExport,
+  parseAndNormalizeImportedData
 } from '../../data/companyStore';
+import { AistudioImageModal } from './AistudioImageModal';
+import { SyncGuideModal } from './SyncGuideModal';
 
 interface AdminModalProps {
   isOpen: boolean;
   onClose: () => void;
   lang: Language;
+  categories?: ProductCategoryDef[];
+  onUpdateCategories?: (newCategories: ProductCategoryDef[]) => void;
   companyInfo?: CompanyInfo;
   onUpdateCompanyInfo: (newInfo: CompanyInfo) => void;
   products?: FaProductItem[];
@@ -48,26 +68,11 @@ interface AdminModalProps {
   onUpdateSliderSettings: (newSettings: HeroSliderSettings) => void;
 }
 
-const PRESET_IMAGES = [
-  { label: 'MR-J5 서보', url: 'http://www.dawooservo.co.kr/data/product/mr_j5.jpg' },
-  { label: 'MR-J4 서보', url: 'http://www.dawooservo.co.kr/data/product/mr_j4.jpg' },
-  { label: 'DD 모터', url: 'http://www.dawooservo.co.kr/data/product/dd_motor.jpg' },
-  { label: 'FR-A800 인버터', url: 'http://www.dawooservo.co.kr/data/product/fr_a800.jpg' },
-  { label: 'FR-E800 인버터', url: 'http://www.dawooservo.co.kr/data/product/fr_e800.jpg' },
-  { label: 'MELSEC iQ-R PLC', url: 'http://www.dawooservo.co.kr/data/product/iq_r.jpg' },
-  { label: 'MELSEC iQ-F PLC', url: 'http://www.dawooservo.co.kr/data/product/iq_f.jpg' },
-  { label: 'GOT2000 HMI', url: 'http://www.dawooservo.co.kr/data/product/got2000.jpg' },
-  { label: 'PILZ 안전 릴레이', url: 'http://www.dawooservo.co.kr/data/product/pilz_safety.jpg' },
-  { label: '삼원ACT 하네스', url: 'http://www.dawooservo.co.kr/data/product/samwon_harness.jpg' },
-  { label: 'APEX 정밀 감속기', url: 'http://www.dawooservo.co.kr/data/product/reducer.jpg' },
-  { label: '다우 6축 로봇', url: 'http://www.dawooservo.co.kr/data/product/robot.jpg' },
-  { label: '리니어 모듈', url: 'http://www.dawooservo.co.kr/data/product/linear.jpg' },
-  { label: '다우FA 회사 로고', url: '/assets/aistudio/image_31b58e19.png' }
-];
-
 export const AdminModal: React.FC<AdminModalProps> = ({
   isOpen,
   onClose,
+  categories = OFFICIAL_CATEGORIES,
+  onUpdateCategories,
   companyInfo = DEFAULT_COMPANY_INFO,
   onUpdateCompanyInfo,
   products = EXTENDED_INITIAL_PRODUCTS,
@@ -88,18 +93,46 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [companyForm, setCompanyForm] = useState<CompanyInfo>(() => companyInfo || DEFAULT_COMPANY_INFO);
   const [companySavedToast, setCompanySavedToast] = useState(false);
 
-  // Products State inside Admin
+  // Products & Categories State inside Admin
   const [adminSearch, setAdminSearch] = useState('');
   const [adminCategoryFilter, setAdminCategoryFilter] = useState('all');
   const [editingProduct, setEditingProduct] = useState<FaProductItem | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [productSavedToast, setProductSavedToast] = useState(false);
 
+  // Category Management State
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<ProductCategoryDef | null>(null);
+  const [isCreatingNewCategory, setIsCreatingNewCategory] = useState(false);
+
   // Slider State inside Admin
   const [sliderForm, setSliderForm] = useState<HeroSliderSettings>(() => sliderSettings || DEFAULT_SLIDER_SETTINGS);
   const [editingSlide, setEditingSlide] = useState<HeroSlideItem | null>(null);
   const [isCreatingNewSlide, setIsCreatingNewSlide] = useState(false);
   const [sliderSavedToast, setSliderSavedToast] = useState(false);
+
+  // Repository Image Selector Popup Modal State
+  const [repoPickerTarget, setRepoPickerTarget] = useState<'product' | 'slide' | null>(null);
+  const [repoSearchQuery, setRepoSearchQuery] = useState('');
+
+  // Source Code Sync (Export / Import) Modal & Toast State
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const [syncModalTab, setSyncModalTab] = useState<'export' | 'import'>('export');
+  const [exportFormat, setExportFormat] = useState<'ts' | 'json'>('ts');
+  const [importInputText, setImportInputText] = useState('');
+  const [importErrorMsg, setImportErrorMsg] = useState('');
+  const [syncToastMsg, setSyncToastMsg] = useState('');
+
+  // Secondary Password Auth State for Sensitive Data Management (PW: DAWOO@1004)
+  const [isSensitiveUnlocked, setIsSensitiveUnlocked] = useState<boolean>(false);
+  const [isSensitiveAuthModalOpen, setIsSensitiveAuthModalOpen] = useState<boolean>(false);
+  const [sensitivePwInput, setSensitivePwInput] = useState<string>('');
+  const [sensitivePwError, setSensitivePwError] = useState<string>('');
+  const [pendingSensitiveLabel, setPendingSensitiveLabel] = useState<string>('');
+  const [pendingSensitiveAction, setPendingSensitiveAction] = useState<(() => void) | null>(null);
+
+  // Sync Guide Help Popup Modal State
+  const [isSyncGuideOpen, setIsSyncGuideOpen] = useState<boolean>(false);
 
   // Check existing session
   useEffect(() => {
@@ -151,12 +184,48 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setIsSensitiveUnlocked(false);
+    setIsSensitiveAuthModalOpen(false);
+    setSensitivePwInput('');
+    setSensitivePwError('');
+    setPendingSensitiveAction(null);
     setAuthId('');
     setAuthPw('');
     try {
       sessionStorage.removeItem('dawoofa_admin_session');
     } catch (err) {
       // Ignore storage errors
+    }
+  };
+
+  // Secondary Password Gate Helper for Sensitive Operations (PW: DAWOO@1004)
+  const requireSensitiveAuth = (label: string, action: () => void) => {
+    if (isSensitiveUnlocked) {
+      action();
+      return;
+    }
+    setPendingSensitiveLabel(label);
+    setPendingSensitiveAction(() => action);
+    setSensitivePwInput('');
+    setSensitivePwError('');
+    setIsSensitiveAuthModalOpen(true);
+  };
+
+  const handleSensitiveAuthSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanPw = sensitivePwInput.trim();
+    if (cleanPw === 'DAWOO@1004') {
+      setIsSensitiveUnlocked(true);
+      setIsSensitiveAuthModalOpen(false);
+      setSensitivePwInput('');
+      setSensitivePwError('');
+      const actionToRun = pendingSensitiveAction;
+      setPendingSensitiveAction(null);
+      if (actionToRun) {
+        actionToRun();
+      }
+    } else {
+      setSensitivePwError('보안 비밀번호가 일치하지 않습니다. 승인된 2차 비밀번호를 입력해 주세요.');
     }
   };
 
@@ -169,36 +238,55 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     setTimeout(() => setCompanySavedToast(false), 3000);
   };
 
-  // Product Image File Upload Handler (Converts to Base64 Data URL)
-  const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !editingProduct) return;
+  // AistudioImageModal Selection Handler (Applies relative ./assets/aistudio/images/... path & saves immediately)
+  const handleSelectRepositoryImage = (relativePath: string) => {
+    const cleanRelativePath = relativePath.startsWith('./')
+      ? relativePath
+      : relativePath.startsWith('/')
+      ? `.${relativePath}`
+      : `./${relativePath}`;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setEditingProduct({
+    if (repoPickerTarget === 'product' && editingProduct) {
+      const updatedEditingProduct: FaProductItem = {
         ...editingProduct,
-        image: base64String
-      });
-    };
-    reader.readAsDataURL(file);
-  };
+        image: cleanRelativePath
+      };
+      setEditingProduct(updatedEditingProduct);
 
-  // Slider Image File Upload Handler
-  const handleSlideImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !editingSlide) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setEditingSlide({
+      // Immediately persist to product catalog data if editing an existing product
+      if (!isCreatingNew) {
+        const updatedList = products.map((p) =>
+          p.id === updatedEditingProduct.id ? updatedEditingProduct : p
+        );
+        saveStoredProducts(updatedList);
+        onUpdateProducts(updatedList);
+        setProductSavedToast(true);
+        setTimeout(() => setProductSavedToast(false), 3000);
+      }
+    } else if (repoPickerTarget === 'slide' && editingSlide) {
+      const updatedEditingSlide: HeroSlideItem = {
         ...editingSlide,
-        image: base64String
-      });
-    };
-    reader.readAsDataURL(file);
+        image: cleanRelativePath
+      };
+      setEditingSlide(updatedEditingSlide);
+
+      if (!isCreatingNewSlide) {
+        const currentSlidesList = sliderForm?.slides || DEFAULT_SLIDER_SETTINGS.slides;
+        const updatedSlides = currentSlidesList.map((s) =>
+          s.id === updatedEditingSlide.id ? updatedEditingSlide : s
+        );
+        const updatedSettings: HeroSliderSettings = {
+          ...sliderForm,
+          slides: updatedSlides
+        };
+        setSliderForm(updatedSettings);
+        saveStoredSliderSettings(updatedSettings);
+        onUpdateSliderSettings(updatedSettings);
+        setSliderSavedToast(true);
+        setTimeout(() => setSliderSavedToast(false), 3000);
+      }
+    }
+    setRepoPickerTarget(null);
   };
 
   // Start Creating New Product (Defaults to currently selected category if not 'all')
@@ -208,9 +296,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
         ? presetCategory
         : adminCategoryFilter !== 'all'
         ? adminCategoryFilter
-        : OFFICIAL_CATEGORIES[0].id;
+        : categories[0]?.id || OFFICIAL_CATEGORIES[0].id;
 
-    const catDef = OFFICIAL_CATEGORIES.find((c) => c.id === defaultCatId) || OFFICIAL_CATEGORIES[0];
+    const catDef = categories.find((c) => c.id === defaultCatId) || categories[0] || OFFICIAL_CATEGORIES[0];
 
     const newItem: FaProductItem = {
       id: `fa-custom-${Date.now()}`,
@@ -238,7 +326,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
         ko: ['베트남 현지 보세창고 정품 보유', '정식 원산지 증명서(C/O) 및 시험성적서(C/Q) 발행'],
         en: ['100% Genuine in Vietnam bonded warehouse', 'Full official C/O & C/Q documentation']
       },
-      image: 'http://www.dawooservo.co.kr/data/product/mr_j5.jpg',
+      image: './assets/aistudio/images/SERVO/SERVO.png',
       inStockVietnam: true,
       leadTime: {
         vi: 'Giao ngay 24~48h (Kho Bắc Ninh / Bình Dương)',
@@ -255,9 +343,10 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     e.preventDefault();
     if (!editingProduct) return;
 
-    const catDef = OFFICIAL_CATEGORIES.find((c) => c.id === editingProduct.category);
+    const catDef = categories.find((c) => c.id === editingProduct.category);
     const finalizedProduct: FaProductItem = {
       ...editingProduct,
+      image: normalizeImagePath(editingProduct.image),
       categoryLabel: catDef
         ? { ko: catDef.nameKo, vi: catDef.nameVn, en: catDef.nameEn }
         : editingProduct.categoryLabel
@@ -270,7 +359,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       updatedList = products.map((p) => (p.id === finalizedProduct.id ? finalizedProduct : p));
     }
 
-    saveStoredProducts(updatedList);
+    saveStoredProducts(updatedList, categories);
     onUpdateProducts(updatedList);
     setEditingProduct(null);
     setIsCreatingNew(false);
@@ -281,12 +370,188 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   // Delete Product
   const handleDeleteProduct = (id: string) => {
     const updatedList = products.filter((p) => p.id !== id);
-    saveStoredProducts(updatedList);
+    saveStoredProducts(updatedList, categories);
     onUpdateProducts(updatedList);
     if (editingProduct?.id === id) {
       setEditingProduct(null);
       setIsCreatingNew(false);
     }
+  };
+
+  // Category Add / Edit / Delete Handlers
+  const handleStartAddCategory = () => {
+    setEditingCategory({
+      id: `cat-${Date.now().toString(36).slice(-4)}`,
+      nameKo: '신규 취급 카테고리',
+      nameVn: 'Danh mục sản phẩm mới',
+      nameEn: 'New Product Category',
+      shortDescKo: '신규 카테고리 주요 취급 품목 설명',
+      shortDescVn: 'Mô tả danh mục thiết bị mới'
+    });
+    setIsCreatingNewCategory(true);
+    setShowCategoryManager(true);
+  };
+
+  const handleSaveCategory = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCategory) return;
+    const cleanId = editingCategory.id.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '') || `cat-${Date.now()}`;
+    const finalizedCat: ProductCategoryDef = {
+      ...editingCategory,
+      id: cleanId
+    };
+
+    let updatedCats: ProductCategoryDef[];
+    if (isCreatingNewCategory) {
+      if (categories.some((c) => c.id === cleanId)) {
+        updatedCats = categories.map((c) => (c.id === cleanId ? finalizedCat : c));
+      } else {
+        updatedCats = [...categories, finalizedCat];
+      }
+    } else {
+      updatedCats = categories.map((c) => (c.id === editingCategory.id ? finalizedCat : c));
+    }
+
+    saveStoredCategories(updatedCats);
+    if (onUpdateCategories) {
+      onUpdateCategories(updatedCats);
+    }
+    setEditingCategory(null);
+    setIsCreatingNewCategory(false);
+    setSyncToastMsg(`카테고리 [${finalizedCat.nameKo}] 설정이 저장되었습니다.`);
+    setTimeout(() => setSyncToastMsg(''), 3500);
+  };
+
+  const handleDeleteCategory = (catId: string) => {
+    if (categories.length <= 1) return;
+    const updatedCats = categories.filter((c) => c.id !== catId);
+    saveStoredCategories(updatedCats);
+    if (onUpdateCategories) {
+      onUpdateCategories(updatedCats);
+    }
+    if (adminCategoryFilter === catId) {
+      setAdminCategoryFilter('all');
+    }
+    setSyncToastMsg(`카테고리(${catId})가 삭제되었습니다.`);
+    setTimeout(() => setSyncToastMsg(''), 3000);
+  };
+
+  // =========================================================================
+  // SOURCE CODE SYNC: COPY TS CODE, EXPORT JSON, IMPORT OVERWRITE HANDLERS
+  // =========================================================================
+  const copyTextToClipboard = async (text: string): Promise<boolean> => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {
+      // Fallback below
+    }
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleCopyTypeScriptSource = async () => {
+    const code = generateTypeScriptSourceSyncCode(categories, products, companyForm, sliderForm);
+    await copyTextToClipboard(code);
+    setExportFormat('ts');
+    setSyncToastMsg(
+      '현재 카테고리 및 제품 데이터(OFFICIAL_CATEGORIES & EXTENDED_INITIAL_PRODUCTS) TypeScript 코드가 클립보드에 복사되었습니다!'
+    );
+    setTimeout(() => setSyncToastMsg(''), 4500);
+  };
+
+  const handleExportJsonAndCopy = async (downloadFile = false) => {
+    const jsonStr = generateStoreJsonExport(categories, products, companyForm, sliderForm);
+    await copyTextToClipboard(jsonStr);
+    if (downloadFile) {
+      try {
+        const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `dawoofa-catalog-sync-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        console.error('JSON file download error', e);
+      }
+    }
+    setSyncToastMsg(
+      downloadFile
+        ? '전체 데이터 JSON 파일 다운로드 및 클립보드 복사가 완료되었습니다!'
+        : '현재 제품/카테고리 JSON 데이터가 클립보드에 복사되었습니다!'
+    );
+    setTimeout(() => setSyncToastMsg(''), 4500);
+  };
+
+  const handleExecuteImportOverwrite = (e: React.FormEvent) => {
+    e.preventDefault();
+    setImportErrorMsg('');
+    try {
+      const result = parseAndNormalizeImportedData(
+        importInputText,
+        categories,
+        companyForm,
+        sliderForm
+      );
+
+      // Persist all imported data to localStorage & update parent React states immediately
+      saveStoredCategories(result.categories);
+      saveStoredProducts(result.products, result.categories);
+      saveStoredCompanyInfo(result.companyInfo);
+      saveStoredSliderSettings(result.sliderSettings);
+
+      if (onUpdateCategories) {
+        onUpdateCategories(result.categories);
+      }
+      onUpdateProducts(result.products);
+      onUpdateCompanyInfo(result.companyInfo);
+      onUpdateSliderSettings(result.sliderSettings);
+
+      setCompanyForm(result.companyInfo);
+      setSliderForm(result.sliderSettings);
+      setEditingProduct(null);
+      setEditingSlide(null);
+      setImportInputText('');
+      setIsSyncModalOpen(false);
+
+      setSyncToastMsg(
+        `데이터 가져오기 완료! 카테고리 ${result.categories.length}개, 제품 ${result.products.length}종이 즉시 동기화 반영되었습니다.`
+      );
+      setTimeout(() => setSyncToastMsg(''), 5000);
+    } catch (err: any) {
+      setImportErrorMsg(err?.message || '데이터 파싱 중 오류가 발생했습니다. JSON 또는 TS 코드 형식을 확인해 주세요.');
+    }
+  };
+
+  const handleImportFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result;
+      if (typeof content === 'string') {
+        setImportInputText(content);
+        setImportErrorMsg('');
+      }
+    };
+    reader.readAsText(file);
   };
 
   // Slider Handlers
@@ -326,7 +591,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
         ko: '신규 광고 슬라이드의 상세 설명 문구 및 주요 공급 품목 안내를 입력하세요.',
         en: 'Enter detailed promotional description and featured FA products.'
       },
-      image: 'http://www.dawooservo.co.kr/data/product/mr_j5.jpg',
+      image: './assets/aistudio/images/SERVO/SERVO.png',
       targetModel: 'MITSUBISHI FA PROMOTION',
       ctaText: {
         vi: 'Yêu cầu báo giá',
@@ -419,18 +684,21 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     const defaults = resetStoreToFactoryDefaults();
     setCompanyForm(defaults.company);
     setSliderForm(defaults.slider);
+    if (onUpdateCategories) {
+      onUpdateCategories(defaults.categories);
+    }
     onUpdateCompanyInfo(defaults.company);
     onUpdateProducts(defaults.products);
     onUpdateSliderSettings(defaults.slider);
     setEditingProduct(null);
     setEditingSlide(null);
-    setCompanySavedToast(true);
-    setTimeout(() => setCompanySavedToast(false), 3000);
+    setSyncToastMsg('초기 기본 데이터(Factory Defaults)로 복원되었습니다.');
+    setTimeout(() => setSyncToastMsg(''), 3000);
   };
 
-  // Filtered products in admin list (1:1 matched with OFFICIAL_CATEGORIES)
+  // Filtered products in admin list (1:1 matched with categories)
   const filteredAdminProducts = products.filter((item) => {
-    const itemCatId = normalizeCategoryKey(item.category);
+    const itemCatId = normalizeCategoryKey(item.category, categories);
     const matchesCat = adminCategoryFilter === 'all' || itemCatId === adminCategoryFilter;
     const q = adminSearch.toLowerCase().trim();
     const matchesSearch =
@@ -602,18 +870,181 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 </button>
               </div>
 
-              <div className="py-2 flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleFactoryReset}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono text-slate-600 hover:text-red-600 bg-slate-100 hover:bg-red-50 border border-slate-300 transition-colors cursor-pointer"
-                  title="초기 데이터로 복원"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>초기값 복원</span>
-                </button>
+              <div className="py-2 flex flex-wrap items-center gap-1.5 ml-auto">
+                {!isSensitiveUnlocked ? (
+                  <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 border border-slate-300 px-2 py-1">
+                    <span className="flex items-center gap-1 text-[11px] font-mono font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-1">
+                      <Lock className="w-3 h-3 text-amber-700" />
+                      <span>민감 데이터 보안잠금</span>
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        requireSensitiveAuth('현재 제품/카테고리 데이터 복사', handleCopyTypeScriptSource)
+                      }
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono font-bold text-white bg-[#2563EB] hover:bg-[#1D4ED8] border border-[#1D4ED8] transition-colors cursor-pointer shadow-2xs"
+                      title="2차 비밀번호 인증 후 사용 가능: 현재 제품/카테고리 데이터 복사"
+                    >
+                      <Lock className="w-3 h-3 text-blue-200" />
+                      <Code className="w-3.5 h-3.5" />
+                      <span>현재 제품/카테고리 데이터 복사</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        requireSensitiveAuth('JSON 내보내기', () => handleExportJsonAndCopy(true))
+                      }
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono font-bold text-[#1E293B] bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 transition-colors cursor-pointer"
+                      title="2차 비밀번호 인증 후 사용 가능: JSON 내보내기"
+                    >
+                      <Lock className="w-3 h-3 text-emerald-700" />
+                      <FileJson className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>JSON 내보내기</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        requireSensitiveAuth('데이터 가져오기(Import)', () => {
+                          setSyncModalTab('import');
+                          setImportErrorMsg('');
+                          setIsSyncModalOpen(true);
+                        })
+                      }
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono font-bold text-[#2563EB] bg-blue-50 hover:bg-blue-100 border border-blue-300 transition-colors cursor-pointer"
+                      title="2차 비밀번호 인증 후 사용 가능: 데이터 가져오기(Import)"
+                    >
+                      <Lock className="w-3 h-3 text-[#2563EB]" />
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>데이터 가져오기(Import)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        requireSensitiveAuth('초기값 복원', handleFactoryReset)
+                      }
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-mono text-slate-600 hover:text-red-600 bg-white hover:bg-red-50 border border-slate-300 transition-colors cursor-pointer"
+                      title="2차 비밀번호 인증 후 사용 가능: 초기값 복원"
+                    >
+                      <Lock className="w-3 h-3 text-slate-500" />
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>초기값 복원</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsSyncGuideOpen(true)}
+                      className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3 py-1.5 rounded flex items-center gap-1 ml-auto transition-colors cursor-pointer shadow-2xs"
+                      title="온라인 관리자 설정 영구 동기화 및 상단 관리 버튼 안내"
+                    >
+                      <HelpCircle className="w-3.5 h-3.5" />
+                      <span>[동기화 가이드 (?)]</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap items-center gap-1.5 bg-emerald-50/70 border border-emerald-300 px-2 py-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSensitiveUnlocked(false);
+                        setIsSyncModalOpen(false);
+                      }}
+                      className="flex items-center gap-1 text-[11px] font-mono font-bold text-emerald-800 bg-emerald-100 hover:bg-amber-100 hover:text-amber-900 border border-emerald-300 px-2 py-1 transition-colors cursor-pointer"
+                      title="민감 데이터 관리 기능 다시 잠그기"
+                    >
+                      <CheckCircle className="w-3 h-3 text-emerald-700" />
+                      <span>보안해제됨 (잠금)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleCopyTypeScriptSource}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono font-bold text-white bg-[#2563EB] hover:bg-[#1D4ED8] border border-[#1D4ED8] transition-colors cursor-pointer shadow-2xs"
+                      title="src/data/companyStore.ts 정적 코드(OFFICIAL_CATEGORIES & EXTENDED_INITIAL_PRODUCTS) 클립보드 복사"
+                    >
+                      <Code className="w-3.5 h-3.5" />
+                      <span>현재 제품/카테고리 데이터 복사</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleExportJsonAndCopy(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono font-bold text-[#1E293B] bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 transition-colors cursor-pointer"
+                      title="현재 전체 데이터 JSON 복사 및 파일 다운로드"
+                    >
+                      <FileJson className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>JSON 내보내기</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSyncModalTab('import');
+                        setImportErrorMsg('');
+                        setIsSyncModalOpen(true);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono font-bold text-[#2563EB] bg-blue-50 hover:bg-blue-100 border border-blue-300 transition-colors cursor-pointer"
+                      title="JSON 또는 TS 데이터를 붙여넣어 전체 데이터 덮어쓰기"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>데이터 가져오기(Import)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleFactoryReset}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-mono text-slate-600 hover:text-red-600 bg-slate-100 hover:bg-red-50 border border-slate-300 transition-colors cursor-pointer"
+                      title="초기 데이터로 복원"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>초기값 복원</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsSyncGuideOpen(true)}
+                      className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3 py-1.5 rounded flex items-center gap-1 ml-auto transition-colors cursor-pointer shadow-2xs"
+                      title="온라인 관리자 설정 영구 동기화 및 상단 관리 버튼 안내"
+                    >
+                      <HelpCircle className="w-3.5 h-3.5" />
+                      <span>[동기화 가이드 (?)]</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Global Sync / Action Toast Notification Bar */}
+            {syncToastMsg && (
+              <div className="bg-emerald-700 text-white px-6 py-2.5 text-xs font-mono font-bold flex items-center justify-between gap-3 shrink-0 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 shrink-0" />
+                  <span>{syncToastMsg}</span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSyncModalTab('export');
+                      setIsSyncModalOpen(true);
+                    }}
+                    className="px-2.5 py-1 bg-white text-emerald-800 text-[11px] font-bold hover:bg-emerald-50 cursor-pointer"
+                  >
+                    복사된 소스코드 확인하기
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSyncToastMsg('')}
+                    className="text-emerald-200 hover:text-white cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Scrollable Tab Workspace */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6">
@@ -629,25 +1060,191 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-2.5 border-b border-slate-200">
                       <div>
                         <span className="text-[10px] font-mono font-bold uppercase text-[#2563EB] block">
-                          1:1 HOMEPAGE CATEGORY MATCHING SYSTEM
+                          1:1 HOMEPAGE CATEGORY MATCHING &amp; SOURCE SYNC SYSTEM
                         </span>
                         <h3 className="text-sm font-extrabold text-[#1E293B]">
-                          홈페이지 취급제품군 {OFFICIAL_CATEGORIES.length}대 카테고리별 1:1 매칭 관리
+                          홈페이지 취급제품군 {categories.length}대 카테고리별 1:1 매칭 관리
                         </h3>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleStartAddProduct()}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold font-mono transition-colors shadow-xs cursor-pointer shrink-0"
-                      >
-                        <Plus className="w-4 h-4" />
-                        <span>
-                          {adminCategoryFilter === 'all'
-                            ? '+ 신규 모델 추가'
-                            : `+ [${OFFICIAL_CATEGORIES.find((c) => c.id === adminCategoryFilter)?.nameKo || adminCategoryFilter}] 모델 추가`}
-                        </span>
-                      </button>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowCategoryManager(!showCategoryManager)}
+                          className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-[#1E293B] border border-slate-300 text-xs font-bold font-mono transition-colors cursor-pointer"
+                        >
+                          <Database className="w-3.5 h-3.5 text-[#2563EB]" />
+                          <span>{showCategoryManager ? '카테고리 편집 닫기' : '카테고리 추가/편집'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleStartAddProduct()}
+                          className="flex items-center gap-1.5 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold font-mono transition-colors shadow-xs cursor-pointer shrink-0"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>
+                            {adminCategoryFilter === 'all'
+                              ? '+ 신규 모델 추가'
+                              : `+ [${categories.find((c) => c.id === adminCategoryFilter)?.nameKo || adminCategoryFilter}] 모델 추가`}
+                          </span>
+                        </button>
+                      </div>
                     </div>
+
+                    {/* Collapsible Category Manager Panel */}
+                    {showCategoryManager && (
+                      <div className="mb-4 p-4 bg-slate-50 border border-blue-200 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="text-xs font-extrabold text-[#1E293B] font-mono">
+                              취급제품 카테고리 목록 관리 ({categories.length}개)
+                            </h4>
+                            <p className="text-[11px] text-slate-500">
+                              카테고리를 추가/수정하면 상단 [현재 제품/카테고리 데이터 복사] 및 [JSON 내보내기] 코드에 즉시 포함됩니다.
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleStartAddCategory}
+                            className="px-3 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-mono font-bold flex items-center gap-1 cursor-pointer"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>신규 카테고리 추가</span>
+                          </button>
+                        </div>
+
+                        {editingCategory && (
+                          <form onSubmit={handleSaveCategory} className="p-3.5 bg-white border-2 border-[#2563EB] space-y-3">
+                            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                              <span className="text-xs font-bold text-[#2563EB] font-mono">
+                                {isCreatingNewCategory ? '신규 카테고리 등록' : `카테고리 수정 (${editingCategory.id})`}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setEditingCategory(null)}
+                                className="text-slate-400 hover:text-slate-700 cursor-pointer"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                              <div>
+                                <label className="block text-[10px] font-mono font-bold text-slate-700 mb-1">
+                                  카테고리 영문 키 (ID) *
+                                </label>
+                                <input
+                                  type="text"
+                                  required
+                                  disabled={!isCreatingNewCategory}
+                                  value={editingCategory.id}
+                                  onChange={(e) => setEditingCategory({ ...editingCategory, id: e.target.value })}
+                                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 font-mono bg-slate-50"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-mono font-bold text-slate-700 mb-1">
+                                  한국어 카테고리명 *
+                                </label>
+                                <input
+                                  type="text"
+                                  required
+                                  value={editingCategory.nameKo}
+                                  onChange={(e) => setEditingCategory({ ...editingCategory, nameKo: e.target.value })}
+                                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-mono font-bold text-slate-700 mb-1">
+                                  베트남어 카테고리명 (Tiếng Việt) *
+                                </label>
+                                <input
+                                  type="text"
+                                  required
+                                  value={editingCategory.nameVn}
+                                  onChange={(e) => setEditingCategory({ ...editingCategory, nameVn: e.target.value })}
+                                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300"
+                                />
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                              <div>
+                                <label className="block text-[10px] font-mono font-bold text-slate-700 mb-1">
+                                  영문명 (English)
+                                </label>
+                                <input
+                                  type="text"
+                                  value={editingCategory.nameEn}
+                                  onChange={(e) => setEditingCategory({ ...editingCategory, nameEn: e.target.value })}
+                                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-mono font-bold text-slate-700 mb-1">
+                                  한국어 요약 설명
+                                </label>
+                                <input
+                                  type="text"
+                                  value={editingCategory.shortDescKo}
+                                  onChange={(e) => setEditingCategory({ ...editingCategory, shortDescKo: e.target.value })}
+                                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-mono font-bold text-slate-700 mb-1">
+                                  베트남어 요약 설명
+                                </label>
+                                <input
+                                  type="text"
+                                  value={editingCategory.shortDescVn}
+                                  onChange={(e) => setEditingCategory({ ...editingCategory, shortDescVn: e.target.value })}
+                                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <button
+                                type="submit"
+                                className="px-4 py-1.5 bg-[#2563EB] text-white text-xs font-mono font-bold cursor-pointer"
+                              >
+                                카테고리 저장
+                              </button>
+                            </div>
+                          </form>
+                        )}
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                          {categories.map((cat) => (
+                            <div
+                              key={cat.id}
+                              className="p-2.5 bg-white border border-slate-200 flex items-center justify-between gap-2 text-xs"
+                            >
+                              <div className="truncate">
+                                <span className="font-mono text-[10px] font-bold text-[#2563EB] mr-1.5">[{cat.id}]</span>
+                                <span className="font-bold text-slate-800">{cat.nameKo}</span>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingCategory(cat);
+                                    setIsCreatingNewCategory(false);
+                                  }}
+                                  className="px-2 py-0.5 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] text-[10px] font-mono border border-slate-300 cursor-pointer"
+                                >
+                                  수정
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteCategory(cat.id)}
+                                  className="px-1.5 py-0.5 bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 text-[10px] font-mono border border-slate-300 cursor-pointer"
+                                >
+                                  삭제
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {/* 1:1 Category Buttons */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
@@ -668,8 +1265,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         </span>
                       </button>
 
-                      {OFFICIAL_CATEGORIES.map((cat) => {
-                        const count = products.filter((p) => normalizeCategoryKey(p.category) === cat.id).length;
+                      {categories.map((cat) => {
+                        const count = products.filter((p) => normalizeCategoryKey(p.category, categories) === cat.id).length;
                         const isSelected = adminCategoryFilter === cat.id;
                         return (
                           <button
@@ -718,7 +1315,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                         {adminCategoryFilter !== 'all' && (
                           <div className="text-xs font-mono font-bold text-[#2563EB] bg-blue-50 px-3 py-1.5 border border-blue-200 flex items-center gap-2">
-                            <span>선택된 카테고리: {OFFICIAL_CATEGORIES.find((c) => c.id === adminCategoryFilter)?.nameKo}</span>
+                            <span>선택된 카테고리: {categories.find((c) => c.id === adminCategoryFilter)?.nameKo}</span>
                             <button
                               type="button"
                               onClick={() => setAdminCategoryFilter('all')}
@@ -740,8 +1337,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       {/* Product Items Table / List */}
                       <div className="bg-white border border-[#CBD5E1] divide-y divide-slate-200 max-h-[560px] overflow-y-auto">
                         {filteredAdminProducts.map((item) => {
-                          const itemCatId = normalizeCategoryKey(item.category);
-                          const matchedCat = OFFICIAL_CATEGORIES.find((c) => c.id === itemCatId);
+                          const itemCatId = normalizeCategoryKey(item.category, categories);
+                          const matchedCat = categories.find((c) => c.id === itemCatId);
                           return (
                             <div
                               key={item.id}
@@ -758,7 +1355,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                     onError={(e) => {
                                       const target = e.target as HTMLImageElement;
                                       target.onerror = null;
-                                      target.src = '/assets/aistudio/image_31b58e19.png';
+                                      target.src = './assets/aistudio/images/logo.png';
                                     }}
                                   />
                                 </div>
@@ -853,7 +1450,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                               }
                               className="w-full px-3 py-2 text-xs border-2 border-blue-200 focus:border-[#2563EB] focus:outline-none bg-blue-50/30 font-bold text-[#1E293B]"
                             >
-                              {OFFICIAL_CATEGORIES.map((cat) => (
+                              {categories.map((cat) => (
                                 <option key={cat.id} value={cat.id}>
                                   {cat.nameKo} ({cat.nameVn})
                                 </option>
@@ -913,11 +1510,16 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             </select>
                           </div>
 
-                          {/* Image Preview + File Upload + URL + Presets */}
-                          <div className="p-3 bg-slate-50 border border-slate-200 space-y-2.5">
-                            <label className="block text-[11px] font-bold text-[#1E293B] font-mono">
-                              제품 이미지 설정 (파일 업로드 또는 URL 입력)
-                            </label>
+                          {/* Image Preview + AistudioImageModal Button + Relative Path Input */}
+                          <div className="p-3.5 bg-slate-50 border border-slate-200 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <label className="block text-[11px] font-bold text-[#1E293B] font-mono">
+                                제품 이미지 설정 (aistudio/images 폴더 탐색)
+                              </label>
+                              <span className="text-[10px] font-mono font-bold text-[#2563EB] bg-blue-50 px-1.5 py-0.5 border border-blue-200">
+                                ./assets/aistudio/images/...
+                              </span>
+                            </div>
 
                             <div className="flex items-center gap-3">
                               <div className="w-20 h-20 bg-white border border-slate-300 p-1.5 flex items-center justify-center shrink-0">
@@ -928,30 +1530,43 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     target.onerror = null;
-                                    target.src = '/assets/aistudio/image_31b58e19.png';
+                                    target.src = './assets/aistudio/images/logo.png';
                                   }}
                                 />
                               </div>
                               <div className="flex-1 space-y-2">
-                                <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1E293B] hover:bg-[#2563EB] text-white text-[11px] font-mono font-bold cursor-pointer transition-colors">
-                                  <Upload className="w-3.5 h-3.5" />
-                                  <span>내 PC에서 이미지 파일 업로드</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setRepoSearchQuery('');
+                                    setRepoPickerTarget('product');
+                                  }}
+                                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-mono font-bold cursor-pointer transition-colors shadow-xs"
+                                >
+                                  <FolderOpen className="w-4 h-4" />
+                                  <span>aistudio/images 폴더 이미지 선택 (모달 열기)</span>
+                                </button>
+                                <div>
+                                  <span className="block text-[10px] font-mono text-slate-500 mb-0.5">
+                                    선택된 이미지 상대 경로 (GitHub Pages 호환 `./` 경로):
+                                  </span>
                                   <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageFileUpload}
-                                    className="hidden"
+                                    type="text"
+                                    value={editingProduct.image}
+                                    onChange={(e) => {
+                                      const raw = e.target.value;
+                                      const formatted =
+                                        raw.startsWith('./') || raw === ''
+                                          ? raw
+                                          : raw.startsWith('/')
+                                          ? `.${raw}`
+                                          : `./${raw}`;
+                                      setEditingProduct({ ...editingProduct, image: formatted });
+                                    }}
+                                    placeholder="./assets/aistudio/images/SERVO/SERVO.png"
+                                    className="w-full px-2.5 py-1.5 text-[11px] border border-[#CBD5E1] bg-white font-mono text-[#1E293B]"
                                   />
-                                </label>
-                                <input
-                                  type="text"
-                                  value={editingProduct.image}
-                                  onChange={(e) =>
-                                    setEditingProduct({ ...editingProduct, image: e.target.value })
-                                  }
-                                  placeholder="이미지 URL 주소 입력..."
-                                  className="w-full px-2.5 py-1.5 text-[11px] border border-[#CBD5E1] bg-white font-mono"
-                                />
+                                </div>
                               </div>
                             </div>
 
@@ -959,17 +1574,21 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             <div>
                               <span className="block text-[10px] font-mono text-slate-500 mb-1 flex items-center gap-1">
                                 <Sparkles className="w-3 h-3 text-[#2563EB]" />
-                                다우FA 공식 제품 사진 빠른 선택:
+                                주요 미쓰비시 &amp; 다우FA 부품 빠른 선택:
                               </span>
                               <div className="flex flex-wrap gap-1">
-                                {PRESET_IMAGES.map((preset) => (
+                                {REPOSITORY_IMAGES.slice(0, 7).map((preset) => (
                                   <button
-                                    key={preset.label}
+                                    key={preset.id}
                                     type="button"
                                     onClick={() =>
-                                      setEditingProduct({ ...editingProduct, image: preset.url })
+                                      setEditingProduct({ ...editingProduct, image: preset.path })
                                     }
-                                    className="px-2 py-0.5 text-[10px] bg-white hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] border border-slate-300 transition-colors cursor-pointer"
+                                    className={`px-2 py-0.5 text-[10px] border transition-colors cursor-pointer ${
+                                      editingProduct.image === preset.path
+                                        ? 'bg-[#2563EB] text-white border-[#2563EB] font-bold'
+                                        : 'bg-white hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] border-slate-300'
+                                    }`}
                                   >
                                     {preset.label}
                                   </button>
@@ -1238,7 +1857,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     target.onerror = null;
-                                    target.src = '/assets/aistudio/image_31b58e19.png';
+                                    target.src = './assets/aistudio/images/logo.png';
                                   }}
                                 />
                               </div>
@@ -1374,11 +1993,16 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             </div>
                           </div>
 
-                          {/* Slide Image Upload + URL + Presets */}
-                          <div className="p-3 bg-slate-50 border border-slate-200 space-y-2.5">
-                            <label className="block text-[11px] font-bold text-[#1E293B] font-mono">
-                              광고 슬라이드 이미지 업데이트 (파일 업로드 또는 URL)
-                            </label>
+                          {/* Slide Image Selector + Relative Path Input */}
+                          <div className="p-3.5 bg-slate-50 border border-slate-200 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <label className="block text-[11px] font-bold text-[#1E293B] font-mono">
+                                광고 슬라이드 이미지 설정 (저장소 이미지 선택)
+                              </label>
+                              <span className="text-[10px] font-mono font-bold text-[#2563EB] bg-blue-50 px-1.5 py-0.5 border border-blue-200">
+                                상대 경로(./) 적용
+                              </span>
+                            </div>
 
                             <div className="flex items-center gap-3">
                               <div className="w-24 h-20 bg-white border border-slate-300 p-1.5 flex items-center justify-center shrink-0">
@@ -1389,28 +2013,29 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     target.onerror = null;
-                                    target.src = '/assets/aistudio/image_31b58e19.png';
+                                    target.src = './assets/aistudio/images/logo.png';
                                   }}
                                 />
                               </div>
                               <div className="flex-1 space-y-2">
-                                <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1E293B] hover:bg-[#2563EB] text-white text-[11px] font-mono font-bold cursor-pointer transition-colors">
-                                  <Upload className="w-3.5 h-3.5" />
-                                  <span>광고 이미지 파일 업로드</span>
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleSlideImageUpload}
-                                    className="hidden"
-                                  />
-                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setRepoSearchQuery('');
+                                    setRepoPickerTarget('slide');
+                                  }}
+                                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-mono font-bold cursor-pointer transition-colors shadow-xs"
+                                >
+                                  <FolderOpen className="w-4 h-4" />
+                                  <span>aistudio/images 폴더 이미지 선택 (모달 열기)</span>
+                                </button>
                                 <input
                                   type="text"
                                   value={editingSlide.image}
                                   onChange={(e) =>
                                     setEditingSlide({ ...editingSlide, image: e.target.value })
                                   }
-                                  placeholder="이미지 URL 입력..."
+                                  placeholder="./assets/aistudio/images/SERVO/SERVO.png"
                                   className="w-full px-2.5 py-1.5 text-[11px] border border-[#CBD5E1] bg-white font-mono"
                                 />
                               </div>
@@ -1418,17 +2043,21 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                             <div>
                               <span className="block text-[10px] font-mono text-slate-500 mb-1">
-                                다우FA 제품 이미지 빠른 적용:
+                                주요 미쓰비시 &amp; 다우FA 이미지 빠른 적용:
                               </span>
                               <div className="flex flex-wrap gap-1">
-                                {PRESET_IMAGES.map((preset) => (
+                                {REPOSITORY_IMAGES.slice(0, 7).map((preset) => (
                                   <button
-                                    key={preset.label}
+                                    key={preset.id}
                                     type="button"
                                     onClick={() =>
-                                      setEditingSlide({ ...editingSlide, image: preset.url })
+                                      setEditingSlide({ ...editingSlide, image: preset.path })
                                     }
-                                    className="px-2 py-0.5 text-[10px] bg-white hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] border border-slate-300 transition-colors cursor-pointer"
+                                    className={`px-2 py-0.5 text-[10px] border transition-colors cursor-pointer ${
+                                      editingSlide.image === preset.path
+                                        ? 'bg-[#2563EB] text-white border-[#2563EB] font-bold'
+                                        : 'bg-white hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] border-slate-300'
+                                    }`}
                                   >
                                     {preset.label}
                                   </button>
@@ -1875,6 +2504,335 @@ export const AdminModal: React.FC<AdminModalProps> = ({
           </div>
         )}
       </div>
+
+      {/* =====================================================================
+          AISTUDIO/IMAGES FOLDER EXPLORER POPUP MODAL (AistudioImageModal)
+         ===================================================================== */}
+      <AistudioImageModal
+        isOpen={repoPickerTarget !== null}
+        onClose={() => setRepoPickerTarget(null)}
+        currentImagePath={
+          repoPickerTarget === 'product'
+            ? editingProduct?.image
+            : editingSlide?.image
+        }
+        onSelectImage={handleSelectRepositoryImage}
+      />
+
+      {/* =====================================================================
+          SOURCE CODE SYNC & DATA IMPORT / EXPORT MODAL
+         ===================================================================== */}
+      {isSyncModalOpen && (
+        <div className="fixed inset-0 z-[60] bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6">
+          <div className="bg-white border-2 border-[#1E293B] w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="bg-[#1E293B] text-white px-5 py-3.5 flex items-center justify-between border-b border-slate-700 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 bg-[#2563EB] flex items-center justify-center font-mono font-bold text-xs">
+                  <Database className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold tracking-wide">
+                    현재 데이터 소스코드 동기화 (내보내기 / JSON 가져오기)
+                  </h3>
+                  <p className="text-[11px] text-slate-300 font-mono">
+                    AI 스튜디오 &amp; GitHub Pages 배포 사이트 간 카테고리/제품/이미지(./assets/aistudio/images/...) 100% 일치 동기화
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSyncModalOpen(false)}
+                className="text-slate-400 hover:text-white p-1 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Sub-Tabs */}
+            <div className="bg-slate-100 border-b border-slate-300 px-5 flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setSyncModalTab('export')}
+                className={`px-4 py-3 text-xs font-bold font-mono border-b-2 flex items-center gap-1.5 cursor-pointer ${
+                  syncModalTab === 'export'
+                    ? 'border-[#2563EB] text-[#2563EB] bg-white'
+                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Code className="w-4 h-4" />
+                <span>1. 현재 데이터 복사 / JSON 내보내기 (Export)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSyncModalTab('import')}
+                className={`px-4 py-3 text-xs font-bold font-mono border-b-2 flex items-center gap-1.5 cursor-pointer ${
+                  syncModalTab === 'import'
+                    ? 'border-[#2563EB] text-[#2563EB] bg-white'
+                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Upload className="w-4 h-4" />
+                <span>2. 데이터 가져오기 / 전체 덮어쓰기 (Import)</span>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-5 overflow-y-auto flex-1 space-y-4 bg-[#F8FAFC]">
+              {syncModalTab === 'export' ? (
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 p-3.5 text-xs text-slate-700 space-y-1.5">
+                    <p className="font-bold text-[#1E293B]">
+                      • 현재 화면에 세팅된 모든 카테고리({categories.length}개) 및 제품({products.length}종) 데이터가 상대 경로(<code>./assets/aistudio/images/...</code>)로 정규화되어 생성되었습니다.
+                    </p>
+                    <p className="text-[11px] text-slate-600">
+                      • <strong>TypeScript 코드 복사</strong>: <code>src/data/companyStore.ts</code> 파일의 <code>OFFICIAL_CATEGORIES</code> 및 <code>EXTENDED_INITIAL_PRODUCTS</code>에 그대로 붙여넣어 정적 소스코드를 영구 업데이트할 수 있습니다.
+                    </p>
+                    <p className="text-[11px] text-slate-600">
+                      • <strong>JSON 내보내기</strong>: 온라인 배포 사이트나 다른 PC의 관리자 페이지 <strong>[데이터 가져오기(Import)]</strong> 탭에 붙여넣어 즉시 동일한 데이터를 적용할 수 있습니다.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setExportFormat('ts')}
+                        className={`px-3 py-1.5 text-xs font-mono font-bold border cursor-pointer ${
+                          exportFormat === 'ts'
+                            ? 'bg-[#1E293B] text-white border-[#1E293B]'
+                            : 'bg-white text-slate-700 border-slate-300'
+                        }`}
+                      >
+                        TypeScript 코드 (src/data/companyStore.ts)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setExportFormat('json')}
+                        className={`px-3 py-1.5 text-xs font-mono font-bold border cursor-pointer ${
+                          exportFormat === 'json'
+                            ? 'bg-[#1E293B] text-white border-[#1E293B]'
+                            : 'bg-white text-slate-700 border-slate-300'
+                        }`}
+                      >
+                        JSON 포맷 (전체 데이터)
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          exportFormat === 'ts'
+                            ? handleCopyTypeScriptSource()
+                            : handleExportJsonAndCopy(false)
+                        }
+                        className="px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>클립보드에 전체 복사</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleExportJsonAndCopy(true)}
+                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>JSON 파일(.json) 다운로드</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <textarea
+                    readOnly
+                    value={
+                      exportFormat === 'ts'
+                        ? generateTypeScriptSourceSyncCode(categories, products, companyForm, sliderForm)
+                        : generateStoreJsonExport(categories, products, companyForm, sliderForm)
+                    }
+                    rows={16}
+                    className="w-full p-3.5 font-mono text-[11px] bg-slate-900 text-emerald-300 border border-slate-700 focus:outline-none leading-relaxed"
+                  />
+                </div>
+              ) : (
+                <form onSubmit={handleExecuteImportOverwrite} className="space-y-4">
+                  <div className="bg-amber-50 border border-amber-300 p-3.5 text-xs text-amber-900 space-y-1">
+                    <p className="font-bold">
+                      • [데이터 가져오기(Import)] 기능 안내
+                    </p>
+                    <p className="text-[11px]">
+                      복사한 <strong>JSON 데이터</strong> 또는 <strong>TypeScript 코드(OFFICIAL_CATEGORIES / EXTENDED_INITIAL_PRODUCTS)</strong>를 아래 입력창에 붙여넣고 <strong>[즉시 전체 데이터 덮어쓰기 적용]</strong> 버튼을 누르면 현재 브라우저 및 화면의 모든 카테고리와 제품 목록이 즉시 동기화됩니다. (모든 이미지 경로는 자동으로 <code>./assets/aistudio/images/...</code> 상대 경로로 정규화됩니다.)
+                    </p>
+                  </div>
+
+                  {importErrorMsg && (
+                    <div className="p-3 bg-red-50 border border-red-300 text-red-700 text-xs font-bold flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{importErrorMsg}</span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <label className="text-xs font-bold text-[#1E293B] font-mono">
+                      JSON 또는 TypeScript 데이터 붙여넣기 *
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <label className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-mono font-bold cursor-pointer flex items-center gap-1.5">
+                        <Upload className="w-3.5 h-3.5 text-[#2563EB]" />
+                        <span>.json 파일 불러오기</span>
+                        <input
+                          type="file"
+                          accept=".json,application/json,text/plain"
+                          onChange={handleImportFileUpload}
+                          className="hidden"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImportInputText(
+                            generateStoreJsonExport(categories, products, companyForm, sliderForm)
+                          );
+                          setImportErrorMsg('');
+                        }}
+                        className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-mono font-bold cursor-pointer"
+                      >
+                        현재 데이터 JSON 불러오기(예시)
+                      </button>
+                    </div>
+                  </div>
+
+                  <textarea
+                    required
+                    value={importInputText}
+                    onChange={(e) => {
+                      setImportInputText(e.target.value);
+                      if (importErrorMsg) setImportErrorMsg('');
+                    }}
+                    placeholder='{"categories": [...], "products": [...]} 형식의 JSON 데이터 또는 복사한 TypeScript 코드를 여기에 붙여넣으세요...'
+                    rows={14}
+                    className="w-full p-3.5 font-mono text-[11px] bg-white text-[#1E293B] border-2 border-[#CBD5E1] focus:border-[#2563EB] focus:outline-none leading-relaxed"
+                  />
+
+                  <div className="flex items-center justify-end gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsSyncModalOpen(false)}
+                      className="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-mono font-bold cursor-pointer"
+                    >
+                      취소
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-mono font-bold uppercase flex items-center gap-1.5 shadow-md cursor-pointer"
+                    >
+                      <Check className="w-4 h-4" />
+                      <span>즉시 전체 데이터 덮어쓰기 적용 (Import)</span>
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* SECONDARY PASSWORD AUTH MODAL FOR SENSITIVE DATA ACTIONS               */}
+      {/* ===================================================================== */}
+      {isSensitiveAuthModalOpen && (
+        <div className="fixed inset-0 z-[80] bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border-2 border-[#1E293B] w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="bg-[#1E293B] text-white px-5 py-3.5 flex items-center justify-between border-b border-slate-700">
+              <div className="flex items-center gap-2">
+                <Lock className="w-4 h-4 text-amber-400" />
+                <h3 className="text-xs sm:text-sm font-bold font-mono">
+                  민감 데이터 관리 • 2차 보안 비밀번호 인증
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSensitiveAuthModalOpen(false);
+                  setSensitivePwInput('');
+                  setSensitivePwError('');
+                  setPendingSensitiveAction(null);
+                }}
+                className="text-slate-400 hover:text-white p-1 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSensitiveAuthSubmit} className="p-6 space-y-4 bg-[#F8FAFC]">
+              <div className="bg-amber-50 border border-amber-300 p-3 text-xs text-amber-900 space-y-1">
+                <p className="font-bold">
+                  요청 작업: <span className="text-[#2563EB] font-mono">[{pendingSensitiveLabel || '민감 데이터 동기화/초기화'}]</span>
+                </p>
+                <p className="text-[11px] text-amber-800">
+                  데이터 소스코드 복사, JSON 내보내기, 데이터 가져오기(덮어쓰기) 및 초기값 복원은 관리자 페이지 내 민감 기능이므로 별도의 2차 비밀번호가 필요합니다.
+                </p>
+              </div>
+
+              {sensitivePwError && (
+                <div className="p-3 bg-red-50 border border-red-300 text-red-700 text-xs font-bold flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{sensitivePwError}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-[#1E293B] font-mono uppercase mb-1.5">
+                  2차 보안 비밀번호 (SECURITY PASSWORD) *
+                </label>
+                <input
+                  type="password"
+                  required
+                  autoFocus
+                  value={sensitivePwInput}
+                  onChange={(e) => {
+                    setSensitivePwInput(e.target.value);
+                    if (sensitivePwError) setSensitivePwError('');
+                  }}
+                  placeholder="2차 보안 비밀번호 입력"
+                  className="w-full px-3.5 py-2.5 text-sm border-2 border-[#CBD5E1] focus:border-[#2563EB] focus:outline-none font-mono bg-white"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSensitiveAuthModalOpen(false);
+                    setSensitivePwInput('');
+                    setSensitivePwError('');
+                    setPendingSensitiveAction(null);
+                  }}
+                  className="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-mono font-bold cursor-pointer"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-mono font-bold uppercase flex items-center gap-1.5 shadow-sm cursor-pointer"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>잠금 해제 및 실행</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* SYNC GUIDE HELP MODAL ([동기화 가이드 (?)])                             */}
+      {/* ===================================================================== */}
+      <SyncGuideModal
+        isOpen={isSyncGuideOpen}
+        onClose={() => setIsSyncGuideOpen(false)}
+        onCopyCurrentData={handleCopyTypeScriptSource}
+      />
     </div>
   );
 };

@@ -560,7 +560,7 @@ export const FA_PRODUCTS: FaProduct[] = [
         "Breakthrough transport for EV battery, smartphone & packaging"
       ]
     },
-    image: "/assets/aistudio/image_855a6e79.png",
+    image: "./assets/aistudio/images/lms_img.png",
     inStockVietnam: true,
     leadTime: {
       ko: "모듈 조합 및 하노이 테스트 후 1주일 내 납품",

@@ -264,8 +264,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     alt={currentTitle}
                     className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.03]"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        'http://www.dawooservo.co.kr/data/product/mr_j5.jpg';
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src = './assets/aistudio/images/SERVO/SERVO.png';
                     }}
                   />
                 </div>

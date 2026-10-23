@@ -30,7 +30,7 @@ export const Footer: React.FC<FooterProps> = ({
             <div className="flex items-center gap-2.5">
               <div className="p-1 bg-white border border-[#CBD5E1] shadow-2xs">
                 <img 
-                  src="/assets/aistudio/image_31b58e19.png" 
+                  src="./assets/aistudio/images/logo.png" 
                   alt="DAWOO FA VINA" 
                   className="h-7 w-auto object-contain" 
                 />

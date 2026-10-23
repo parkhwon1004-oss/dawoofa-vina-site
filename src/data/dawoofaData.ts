@@ -117,7 +117,7 @@ export const DAWOOFA_PRODUCTS: FaProductItem[] = [
         'Industry-leading 3.5 kHz speed frequency response'
       ]
     },
-    image: 'http://www.dawooservo.co.kr/data/product/mr_j5.jpg',
+    image: './assets/aistudio/images/SERVO/SERVO.png',
     inStockVietnam: true,
     leadTime: {
       vi: 'Sẵn hàng tại kho (Giao ngay 24~48h)',
@@ -168,7 +168,7 @@ export const DAWOOFA_PRODUCTS: FaProductItem[] = [
         'Abundant local spare parts stock for emergency plant support'
       ]
     },
-    image: 'http://www.dawooservo.co.kr/data/product/mr_j4.jpg',
+    image: './assets/aistudio/images/SERVO/j4.png',
     inStockVietnam: true,
     leadTime: {
       vi: 'Sẵn hàng tại kho (Giao ngay 24~48h)',
@@ -219,7 +219,7 @@ export const DAWOOFA_PRODUCTS: FaProductItem[] = [
         'High-speed linear actuators for high-throughput pick & place'
       ]
     },
-    image: 'http://www.dawooservo.co.kr/data/product/dd_motor.jpg',
+    image: './assets/aistudio/images/SERVO/nikidenso.png',
     inStockVietnam: true,
     leadTime: {
       vi: 'Kho dự án (Giao trong 3~5 ngày hoặc 2 tuần)',
@@ -269,7 +269,7 @@ export const DAWOOFA_PRODUCTS: FaProductItem[] = [
         'Integrated STO SIL3 / PLe functional safety'
       ]
     },
-    image: 'http://www.dawooservo.co.kr/data/product/fr_a800.jpg',
+    image: './assets/aistudio/images/INVERTER/INVERTER.png',
     inStockVietnam: true,
     leadTime: {
       vi: 'Sẵn hàng tại kho (Giao ngay 24~48h)',
@@ -320,7 +320,7 @@ export const DAWOOFA_PRODUCTS: FaProductItem[] = [
         'Conformal coated PCB resistant to tropical industrial humidity'
       ]
     },
-    image: 'http://www.dawooservo.co.kr/data/product/fr_e800.jpg',
+    image: './assets/aistudio/images/INVERTER/INVERTER.png',
     inStockVietnam: true,
     leadTime: {
       vi: 'Sẵn hàng tại kho (Giao ngay 24~48h)',
@@ -371,7 +371,7 @@ export const DAWOOFA_PRODUCTS: FaProductItem[] = [
         'Built-in data logging for Smart Factory traceability'
       ]
     },
-    image: 'http://www.dawooservo.co.kr/data/product/iq_r.jpg',
+    image: './assets/aistudio/images/PLC/IQ_PLC.png',
     inStockVietnam: true,
     leadTime: {
       vi: 'Sẵn hàng tại kho (Giao ngay 24~48h)',
@@ -422,7 +422,7 @@ export const DAWOOFA_PRODUCTS: FaProductItem[] = [
         'Embedded Ethernet port for seamless GOT & SCADA networking'
       ]
     },
-    image: 'http://www.dawooservo.co.kr/data/product/iq_f.jpg',
+    image: './assets/aistudio/images/PLC/IQ_PLC.png',
     inStockVietnam: true,
     leadTime: {
       vi: 'Sẵn hàng tại kho (Giao ngay 24~48h)',
@@ -472,7 +472,7 @@ export const DAWOOFA_PRODUCTS: FaProductItem[] = [
         'Seamless communication drivers for Mitsubishi and 3rd party PLCs'
       ]
     },
-    image: 'http://www.dawooservo.co.kr/data/product/got2000.jpg',
+    image: './assets/aistudio/images/PLC/got.png',
     inStockVietnam: true,
     leadTime: {
       vi: 'Sẵn hàng tại kho (Giao ngay 24~48h)',
@@ -523,7 +523,7 @@ export const DAWOOFA_PRODUCTS: FaProductItem[] = [
         'Standardized for robotic cell emergency stops and safety interlocking'
       ]
     },
-    image: 'http://www.dawooservo.co.kr/data/product/pilz_safety.jpg',
+    image: './assets/aistudio/images/PILZ/PILZ.png',
     inStockVietnam: true,
     leadTime: {
       vi: 'Sẵn hàng tại kho (Giao ngay 24~48h)',
@@ -573,7 +573,7 @@ export const DAWOOFA_PRODUCTS: FaProductItem[] = [
         'Push-in I/O interface blocks reducing cabinet wiring time by 80%'
       ]
     },
-    image: 'http://www.dawooservo.co.kr/data/product/samwon_harness.jpg',
+    image: './assets/aistudio/images/SAMWON/SAMWON.png',
     inStockVietnam: true,
     leadTime: {
       vi: 'Sẵn hàng tại kho (Giao ngay trong ngày)',

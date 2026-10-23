@@ -178,7 +178,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             {/* Subtle Signature Bar */}
             <div className="pt-2 flex items-center gap-3">
               <img
-                src="/assets/aistudio/image_31b58e19.png"
+                src="./assets/aistudio/images/logo.png"
                 alt="DAWOOFA VINA"
                 className="h-7 w-auto object-contain"
               />
